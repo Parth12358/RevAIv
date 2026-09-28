@@ -81,7 +81,7 @@ app.post("/onboard", requireAuth(), async (c) => {
     await run(
       c.env,
       `INSERT INTO reviewer_stats (reviewer_id, qualified, gold_accuracy, headline, expertise_json, bio, country, linkedin_url)
-       VALUES (?1, COALESCE((SELECT qualified FROM reviewer_stats WHERE reviewer_id=?1),0),
+       VALUES (?1, COALESCE((SELECT qualified FROM reviewer_stats WHERE reviewer_id=?1),1),
                COALESCE((SELECT gold_accuracy FROM reviewer_stats WHERE reviewer_id=?1),0.5), ?2, ?3, ?4, ?5, ?6)
        ON CONFLICT(reviewer_id) DO UPDATE SET headline=?2, expertise_json=?3, bio=?4, country=?5, linkedin_url=?6`,
       session.userId,

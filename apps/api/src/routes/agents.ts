@@ -45,7 +45,11 @@ app.get("/:id", async (c) => {
   const agentId = c.req.param("id");
   const agent = await first<Record<string, unknown>>(
     c.env,
-    `SELECT id, name, category, adapter_type, owner_url, created_at FROM agents WHERE id = ?1`,
+    `SELECT a.id, a.name, a.category, a.adapter_type, a.owner_url, a.is_demo, a.created_at,
+            (SELECT COUNT(*) FROM agent_versions av2
+               JOIN runs r2 ON r2.agent_version_id = av2.id
+              WHERE av2.agent_id = a.id AND r2.status = 'done') AS done_runs
+       FROM agents a WHERE a.id = ?1`,
     agentId,
   );
   if (!agent) return c.json({ error: "not found" }, 404);

@@ -1,7 +1,51 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
-import { Label, Meter, ScoreBadge, Ornament, LinkButton } from "../components/ui";
+import { Label, Meter, ScoreBadge, Ornament, LinkButton, Tag } from "../components/ui";
+
+// Adapter-specific setup guidance shown on the dossier.
+const ADAPTER_SETUP: Record<string, { how: string; steps: string[] }> = {
+  claude_wrapper: {
+    how: "Runs on the Claude API — a prompt/tooling wrapper around an Anthropic model.",
+    steps: [
+      "Create an Anthropic API key at console.anthropic.com.",
+      "Point the wrapper at the model and paste your key into its config.",
+      "Send the field task as the user message; capture the reply as the output.",
+    ],
+  },
+  http: {
+    how: "Exposes an HTTP API you call with the task prompt.",
+    steps: [
+      "Sign up with the provider and generate an API key.",
+      "POST the task prompt to the provider's endpoint with your key in the Authorization header.",
+      "Read the response body as the agent's output.",
+    ],
+  },
+  mcp: {
+    how: "Runs as an MCP server that an MCP-capable client connects to.",
+    steps: [
+      "Install the server and add it to your MCP client's config.",
+      "Authenticate if the server requires a key or OAuth.",
+      "Call the relevant tool with the task prompt; capture the tool result.",
+    ],
+  },
+  brainbase: {
+    how: "Hosted as a Brainbase worker (a scripted agent harness).",
+    steps: [
+      "Open the worker in Brainbase and note its harness + model.",
+      "Trigger a run with the task prompt as input.",
+      "Collect the worker's final output.",
+    ],
+  },
+  manual: {
+    how: "Run the tool yourself and record the result.",
+    steps: [
+      "Open the provider and start the task from the brief.",
+      "Let it finish, then copy the deliverable it produces.",
+      "Paste that output back in as the run to be reviewed.",
+    ],
+  },
+};
 
 export default function AgentDetail() {
   const { id } = useParams();
@@ -90,6 +134,57 @@ export default function AgentDetail() {
           )}
         </div>
       </section>
+
+      {/* How to run / set up this agent */}
+      {(() => {
+        const setup = ADAPTER_SETUP[agent.adapter_type as string] ?? ADAPTER_SETUP.manual;
+        const connected = (agent.done_runs ?? 0) > 0 && agent.is_demo !== 1;
+        const host = agent.owner_url ? (() => { try { return new URL(agent.owner_url).hostname.replace(/^www\./, ""); } catch { return null; } })() : null;
+        return (
+          <section className="py-8 border-b border-ink grid grid-cols-12 gap-0">
+            <div className="col-span-12 lg:col-span-7 lg:border-r border-ink lg:pr-8">
+              <div className="flex items-center gap-3">
+                <Label>How to Run This Agent</Label>
+                {agent.is_demo === 1 ? (
+                  <Tag tone="outline">Demo · sample data</Tag>
+                ) : connected ? (
+                  <Tag tone="solid">Connected · live</Tag>
+                ) : (
+                  <Tag tone="outline">Catalog</Tag>
+                )}
+              </div>
+              <p className="mt-4 font-body text-neutral-700 leading-relaxed">{setup.how}</p>
+              {agent.is_demo === 1 && (
+                <p className="mt-3 font-mono text-[0.7rem] text-neutral-500 leading-relaxed">
+                  This listing currently shows sample outputs so reviewers can see the flow. Connect the real API to turn it into a live, scored agent.
+                </p>
+              )}
+              <ol className="mt-5 space-y-3">
+                {setup.steps.map((s: string, i: number) => (
+                  <li key={i} className="flex gap-3">
+                    <span className="font-mono text-sm text-editorial shrink-0">{i + 1}.</span>
+                    <span className="font-body text-neutral-700 leading-snug">{s}</span>
+                  </li>
+                ))}
+              </ol>
+              {agent.owner_url && (
+                <a href={agent.owner_url} target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center label text-[0.65rem] text-editorial hover:underline decoration-2 underline-offset-4">
+                  Visit provider{host ? ` · ${host}` : ""} ↗
+                </a>
+              )}
+            </div>
+            <div className="col-span-12 lg:col-span-5 mt-6 lg:mt-0 lg:pl-8">
+              <Label>How We Score It</Label>
+              <ol className="mt-5 space-y-3 font-body text-neutral-700">
+                <li className="flex gap-3"><span className="font-mono text-sm text-editorial shrink-0">1.</span><span className="leading-snug">Every agent in this field gets the same short task (under ~10 minutes of real work).</span></li>
+                <li className="flex gap-3"><span className="font-mono text-sm text-editorial shrink-0">2.</span><span className="leading-snug">We capture its output and route it <em>blind</em> to a vetted reviewer who works in this field.</span></li>
+                <li className="flex gap-3"><span className="font-mono text-sm text-editorial shrink-0">3.</span><span className="leading-snug">They score quality, cost, and speed on a rubric — hidden gold checks keep reviewers honest.</span></li>
+                <li className="flex gap-3"><span className="font-mono text-sm text-editorial shrink-0">4.</span><span className="leading-snug">Scores roll up into the Trust number, recomputed as new reviews land.</span></li>
+              </ol>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Reviews — the face behind the score */}
       {reviews && reviews.length > 0 && (

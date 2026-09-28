@@ -110,6 +110,17 @@ export default function Reviewer() {
                 }}
               />
             </div>
+            {target.kind === "run" && (
+              <div className="mt-4 pt-4 border-t border-divider flex items-center justify-between gap-3">
+                <span className="font-mono text-[0.65rem] text-neutral-500">Outside your expertise, or can't judge fairly?</span>
+                <button
+                  onClick={skip}
+                  className="label text-[0.65rem] px-4 min-h-[40px] inline-flex items-center border border-ink text-neutral-600 hover:bg-ink hover:text-paper transition-colors"
+                >
+                  Skip &amp; get next →
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
