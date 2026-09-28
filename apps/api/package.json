@@ -1,0 +1,25 @@
+{
+  "name": "@agent-trust/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 migrations apply agent-trust-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply agent-trust-db --remote",
+    "db:seed": "wrangler d1 execute agent-trust-db --local --file=./seed/tasks.sql",
+    "db:seed:remote": "wrangler d1 execute agent-trust-db --remote --file=./seed/tasks.sql",
+    "db:wipe": "wrangler d1 execute agent-trust-db --local --file=./seed/wipe.sql",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "hono": "^4.6.14"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "typescript": "^5.7.2",
+    "wrangler": "^3.99.0"
+  }
+}

@@ -1,0 +1,49 @@
+name = "agent-trust-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ---- D1 (SQLite relational DB) ----
+[[d1_databases]]
+binding = "DB"
+database_name = "agent-trust-db"
+database_id = "REPLACE_WITH_D1_ID"        # from: npx wrangler d1 create agent-trust-db
+migrations_dir = "migrations"
+
+# ---- R2 (raw agent outputs) ----
+[[r2_buckets]]
+binding = "OUTPUTS"
+bucket_name = "agent-outputs"             # from: npx wrangler r2 bucket create agent-outputs
+
+# ---- KV (magic-link tokens + sessions) ----
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "REPLACE_WITH_KV_ID"                  # from: npx wrangler kv namespace create SESSIONS
+
+# ---- Queue: producer binding ----
+[[queues.producers]]
+binding = "RUN_QUEUE"
+queue = "runs"                             # from: npx wrangler queues create runs
+
+# ---- Queue: consumer (same Worker) ----
+[[queues.consumers]]
+queue = "runs"
+max_batch_size = 5
+max_retries = 3
+max_batch_timeout = 30
+
+# ---- Cron: daily re-test gate (monthly logic inside handler) ----
+[triggers]
+crons = ["0 3 * * *"]
+
+# ---- Non-secret vars ----
+[vars]
+APP_BASE_URL = "http://localhost:5173"
+API_BASE_URL = "http://localhost:8787"
+VETTING_PRICE_CENTS = "40000"
+MEMBERSHIP_PRICE_CENTS = "20000"
+# Sign up with this email to be granted the admin role.
+ADMIN_EMAIL = "admin@agenttrust.dev"
+
+# Secrets (set via `npx wrangler secret put <NAME>`, or .dev.vars locally):
+#   CLAUDE_API_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, ENCRYPTION_KEY
