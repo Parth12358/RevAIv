@@ -101,7 +101,7 @@ export default function Onboarding() {
           </>
         )}
         {err && <p className="font-mono text-xs text-editorial">{err}</p>}
-        <Button onClick={submit} disabled={busy || !displayName}>{busy ? "Saving…" : "Finish setup"}</Button>
+        <Button data-tour="onboarding-submit" onClick={submit} disabled={busy || !displayName}>{busy ? "Saving…" : "Finish setup"}</Button>
       </Card>
     </div>
   );

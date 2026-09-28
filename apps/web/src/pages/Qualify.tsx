@@ -32,7 +32,7 @@ export default function Qualify() {
           {result.qualified && <button onClick={() => nav("/review")} className="mt-4 underline decoration-2 decoration-editorial underline-offset-4 label text-[0.7rem]">Go to the Review Desk →</button>}
         </div>
       ) : (
-        <div className="mt-6 border border-ink p-6">
+        <div data-tour="qualify-form" className="mt-6 border border-ink p-6">
           <RubricForm rubric={task.rubric} requireReason={false} submitLabel="Submit qualification" onSubmit={async (scores) => setResult(await api.submitQualification(task.task_id, scores))} />
         </div>
       )}

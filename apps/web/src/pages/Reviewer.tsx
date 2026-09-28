@@ -11,20 +11,28 @@ export default function Reviewer() {
   const [needQual, setNeedQual] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [stats, setStats] = useState<any>(null);
+  const [skipped, setSkipped] = useState<string[]>([]);
 
-  async function claim() {
+  async function claim(exclude: string[] = skipped) {
     setMessage(null);
     setNeedQual(false);
     setToast(null);
     try {
-      const r = await api.reviewsNext();
+      const r = await api.reviewsNext(exclude);
       setTarget(r.review_target);
-      if (!r.review_target) setMessage(r.message ?? "The queue is empty.");
+      if (!r.review_target) setMessage(r.message ?? "You've reviewed everything in your fields. Thank you!");
     } catch (e) {
       const m = (e as Error).message;
       if (m.includes("qualified")) setNeedQual(true);
       else setMessage(m);
     }
+  }
+
+  function skip() {
+    if (!target?.run_id) { claim(); return; }
+    const next = [...skipped, target.run_id];
+    setSkipped(next);
+    claim(next);
   }
 
   useEffect(() => {
@@ -34,7 +42,7 @@ export default function Reviewer() {
 
   return (
     <div>
-      <div className="border-b-4 border-ink pb-4 flex items-end justify-between flex-wrap gap-4">
+      <div data-tour="review-desk" className="border-b-4 border-ink pb-4 flex items-end justify-between flex-wrap gap-4">
         <div>
           <Label className="text-editorial">The Review Desk</Label>
           <h1 className="mt-2 font-serif font-black tracking-tighter text-5xl leading-[0.9]">Claim &amp; Judge</h1>
@@ -79,9 +87,14 @@ export default function Reviewer() {
             </div>
             <p className="mt-2 font-body text-lg leading-relaxed">{target.prompt}</p>
             <div className="mt-6">
-              <Label>Agent Output · Fig. 1.1</Label>
+              <div className="flex items-center justify-between">
+                <Label>Agent Output · Fig. 1.1</Label>
+                {target.kind === "run" && (
+                  <button onClick={skip} className="label text-[0.6rem] text-neutral-500 hover:text-editorial transition-colors">Skip this one →</button>
+                )}
+              </div>
               <MarkdownView value={target.output} className="mt-2 max-h-[32rem]" />
-              <p className="mt-2 font-mono text-[0.65rem] text-neutral-500 uppercase tracking-widest">Reviewer is blind to which agent produced this output.</p>
+              <p className="mt-2 font-mono text-[0.65rem] text-neutral-500 uppercase tracking-widest">Reviewer is blind to which agent produced this output. Skip if it's outside your expertise.</p>
             </div>
           </div>
           <div className="col-span-12 lg:col-span-5 mt-8 lg:mt-0 lg:pl-8">

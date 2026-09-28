@@ -59,6 +59,10 @@ app.get("/next", requireAuth(["reviewer", "admin"]), async (c) => {
     }
   }
 
+  // Runs the reviewer chose to skip this session (client-supplied).
+  const exclude = (c.req.query("exclude") || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const exSql = (start: number) => (exclude.length ? ` AND r.id NOT IN (${exclude.map((_, i) => `?${start + i}`).join(",")})` : "");
+
   // Find a done run this reviewer hasn't reviewed yet. Prefer the reviewer's
   // chosen fields; fall back to any field if none are left in their fields.
   type RunRow = { id: string; task_id: string; output_full: string | null; output_preview: string | null };
@@ -72,11 +76,12 @@ app.get("/next", requireAuth(["reviewer", "admin"]), async (c) => {
          FROM runs r JOIN tasks t ON t.id = r.task_id
         WHERE r.status = 'done'
           AND t.category IN (${placeholders})
-          AND NOT EXISTS (SELECT 1 FROM reviews rv WHERE rv.run_id = r.id AND rv.reviewer_id = ?1)
+          AND NOT EXISTS (SELECT 1 FROM reviews rv WHERE rv.run_id = r.id AND rv.reviewer_id = ?1)${exSql(2 + expertise.length)}
         ORDER BY r.finished_at ASC
         LIMIT 1`,
       session.userId,
       ...expertise,
+      ...exclude,
     );
   }
 
@@ -86,10 +91,11 @@ app.get("/next", requireAuth(["reviewer", "admin"]), async (c) => {
       `SELECT r.id, r.task_id, r.output_full, r.output_preview
          FROM runs r
         WHERE r.status = 'done'
-          AND NOT EXISTS (SELECT 1 FROM reviews rv WHERE rv.run_id = r.id AND rv.reviewer_id = ?1)
+          AND NOT EXISTS (SELECT 1 FROM reviews rv WHERE rv.run_id = r.id AND rv.reviewer_id = ?1)${exSql(2)}
         ORDER BY r.finished_at ASC
         LIMIT 1`,
       session.userId,
+      ...exclude,
     );
   }
   if (!runRow) return c.json({ review_target: null, message: "queue empty" });

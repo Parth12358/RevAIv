@@ -123,7 +123,10 @@ export const api = {
     }),
 
   // reviewer
-  reviewsNext: () => req<{ review_target: ReviewTarget | null; message?: string }>("/reviews/next"),
+  reviewsNext: (exclude?: string[]) =>
+    req<{ review_target: ReviewTarget | null; message?: string }>(
+      `/reviews/next${exclude && exclude.length ? `?exclude=${exclude.join(",")}` : ""}`,
+    ),
   submitReview: (body: Record<string, unknown>) =>
     req<{ ok: boolean; overall: number; is_gold_check: boolean }>("/reviews", {
       method: "POST",

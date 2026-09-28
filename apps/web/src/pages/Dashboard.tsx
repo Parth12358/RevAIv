@@ -75,7 +75,7 @@ export default function Dashboard() {
                 <Tag>{rstats?.reviews_count ?? 0} reviews</Tag>
               </div>
             </div>
-            {rstats?.qualified ? <LinkButton to="/review">Go to the Review Desk</LinkButton> : <LinkButton to="/qualify">Take qualification</LinkButton>}
+            <span data-tour="reviewer-cta">{rstats?.qualified ? <LinkButton to="/review">Go to the Review Desk</LinkButton> : <LinkButton to="/qualify">Take qualification</LinkButton>}</span>
           </div>
           <div className="mt-6 grid grid-cols-1 md:grid-cols-3 border-l border-t border-ink">
             <ActionCard to="/review" title="Review Desk" desc="Claim blind outputs and score them against the rubric." />

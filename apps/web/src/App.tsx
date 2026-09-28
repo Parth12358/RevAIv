@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./lib/auth";
+import { TourProvider } from "./lib/tour";
 import type { Role } from "./lib/api";
 import { NewsprintLayout } from "./components/NewsprintLayout";
 import { AppShell } from "./components/AppShell";
+import { TourOverlay } from "./components/TourOverlay";
 
 // Front-of-house pages
 import Home from "./pages/Home";
@@ -48,6 +50,7 @@ function Protected({
 export default function App() {
   return (
     <AuthProvider>
+      <TourProvider>
       <Routes>
         {/* Front-of-house — Newsprint */}
         <Route path="/" element={<News><Home /></News>} />
@@ -72,6 +75,8 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <TourOverlay />
+      </TourProvider>
     </AuthProvider>
   );
 }
