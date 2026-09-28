@@ -18,14 +18,22 @@ app.get("/next", requireAuth(["reviewer", "admin"]), async (c) => {
   const session = c.get("session");
 
   // Reviewer must be qualified (admins bypass).
-  const stats = await first<{ qualified: number; paused: number }>(
+  const stats = await first<{ qualified: number; paused: number; expertise_json: string | null }>(
     c.env,
-    `SELECT qualified, paused FROM reviewer_stats WHERE reviewer_id = ?1`,
+    `SELECT qualified, paused, expertise_json FROM reviewer_stats WHERE reviewer_id = ?1`,
     session.userId,
   );
   if (session.role === "reviewer") {
     if (!stats || stats.qualified !== 1) return c.json({ error: "not qualified", needs_qualification: true }, 403);
     if (stats.paused === 1) return c.json({ error: "reviewer paused" }, 403);
+  }
+
+  // The reviewer's chosen fields — we serve outputs in these first.
+  let expertise: string[] = [];
+  try {
+    expertise = stats?.expertise_json ? (JSON.parse(stats.expertise_json) as string[]) : [];
+  } catch {
+    expertise = [];
   }
 
   // Deterministic-ish gold injection based on a random draw.
@@ -50,17 +58,39 @@ app.get("/next", requireAuth(["reviewer", "admin"]), async (c) => {
     }
   }
 
-  // Find a done run this reviewer hasn't reviewed yet.
-  const runRow = await first<{ id: string; task_id: string; output_full: string | null; output_preview: string | null }>(
-    c.env,
-    `SELECT r.id, r.task_id, r.output_full, r.output_preview
-       FROM runs r
-      WHERE r.status = 'done'
-        AND NOT EXISTS (SELECT 1 FROM reviews rv WHERE rv.run_id = r.id AND rv.reviewer_id = ?1)
-      ORDER BY r.finished_at ASC
-      LIMIT 1`,
-    session.userId,
-  );
+  // Find a done run this reviewer hasn't reviewed yet. Prefer the reviewer's
+  // chosen fields; fall back to any field if none are left in their fields.
+  type RunRow = { id: string; task_id: string; output_full: string | null; output_preview: string | null };
+  let runRow: RunRow | null = null;
+
+  if (expertise.length) {
+    const placeholders = expertise.map((_, i) => `?${i + 2}`).join(",");
+    runRow = await first<RunRow>(
+      c.env,
+      `SELECT r.id, r.task_id, r.output_full, r.output_preview
+         FROM runs r JOIN tasks t ON t.id = r.task_id
+        WHERE r.status = 'done'
+          AND t.category IN (${placeholders})
+          AND NOT EXISTS (SELECT 1 FROM reviews rv WHERE rv.run_id = r.id AND rv.reviewer_id = ?1)
+        ORDER BY r.finished_at ASC
+        LIMIT 1`,
+      session.userId,
+      ...expertise,
+    );
+  }
+
+  if (!runRow) {
+    runRow = await first<RunRow>(
+      c.env,
+      `SELECT r.id, r.task_id, r.output_full, r.output_preview
+         FROM runs r
+        WHERE r.status = 'done'
+          AND NOT EXISTS (SELECT 1 FROM reviews rv WHERE rv.run_id = r.id AND rv.reviewer_id = ?1)
+        ORDER BY r.finished_at ASC
+        LIMIT 1`,
+      session.userId,
+    );
+  }
   if (!runRow) return c.json({ review_target: null, message: "queue empty" });
 
   const task = await first<{ prompt: string; rubric_json: string }>(

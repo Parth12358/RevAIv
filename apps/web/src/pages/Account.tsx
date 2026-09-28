@@ -81,6 +81,44 @@ export default function Account() {
         </div>
       )}
 
+      {/* Reviewer earnings */}
+      {(session?.role === "reviewer" || session?.role === "admin") && rstats && (() => {
+        const rate = 3.5;
+        const reviews = rstats.reviews_count ?? 0;
+        const gross = reviews * rate;
+        const paid = Math.round(reviews * 0.6) * rate; // demo split
+        const pending = gross - paid;
+        return (
+          <div className="mt-6 p-6 border-2 border-ink">
+            <div className="flex items-center justify-between">
+              <Label>Earnings</Label>
+              <Tag>Test mode · no real payout</Tag>
+            </div>
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-4 border-l border-t border-ink font-mono">
+              <div className="border-r border-b border-ink p-4">
+                <div className="label text-[0.55rem] text-neutral-500">Reviews</div>
+                <div className="mt-1 text-3xl">{reviews}</div>
+              </div>
+              <div className="border-r border-b border-ink p-4">
+                <div className="label text-[0.55rem] text-neutral-500">Rate / review</div>
+                <div className="mt-1 text-3xl">${rate.toFixed(2)}</div>
+              </div>
+              <div className="border-r border-b border-ink p-4 bg-ink text-paper">
+                <div className="label text-[0.55rem] text-neutral-400">Earned</div>
+                <div className="mt-1 text-3xl">${gross.toFixed(2)}</div>
+              </div>
+              <div className="border-r border-b border-ink p-4">
+                <div className="label text-[0.55rem] text-neutral-500">Pending payout</div>
+                <div className="mt-1 text-3xl">${pending.toFixed(2)}</div>
+              </div>
+            </div>
+            <p className="mt-3 font-mono text-[0.65rem] text-neutral-500">
+              ${paid.toFixed(2)} paid to date · ${pending.toFixed(2)} pending · Payouts run via Stripe Connect (test mode) at ${rate.toFixed(2)} per accepted review.
+            </p>
+          </div>
+        );
+      })()}
+
       <Ornament />
     </div>
   );
