@@ -16,7 +16,7 @@ export default function ReviewerProfile() {
   if (err) return (
     <div className="py-16 text-center">
       <p className="font-mono text-sm text-editorial">{err}</p>
-      <Link to="/reviewers" className="mt-4 inline-block label text-[0.65rem] hover:text-editorial">← Back to the reviewers</Link>
+      <Link to="/reviewers" className="mt-4 inline-block label text-[0.65rem] hover:text-editorial">← Back to reviewers</Link>
     </div>
   );
   if (!data) return <p className="py-16 text-center font-mono text-sm text-neutral-500">Loading…</p>;
@@ -25,10 +25,10 @@ export default function ReviewerProfile() {
 
   return (
     <article className="py-8">
-      <Link to="/reviewers" className="label text-[0.65rem] hover:text-editorial">← The Reviewers</Link>
+      <Link to="/reviewers" className="label text-[0.65rem] hover:text-editorial">← Reviewers</Link>
 
       <header className="mt-4 border-b-4 border-ink pb-8">
-        <Label className="text-editorial">Reviewer · The face behind the score</Label>
+        <Label className="text-editorial">Reviewer</Label>
         <div className="mt-3 flex items-end justify-between flex-wrap gap-4">
           <h1 className="font-serif font-black tracking-tighter leading-[0.92] text-5xl lg:text-7xl">
             {profile.display_name ?? "Anonymous reviewer"}
@@ -43,7 +43,7 @@ export default function ReviewerProfile() {
         <div className="mt-4 flex flex-wrap gap-2">
           <Tag tone="solid">{profile.reviews_count ?? reviews.length} reviews</Tag>
           {profile.country && <Tag tone="outline">{profile.country}</Tag>}
-          {profile.gold_accuracy != null && <Tag tone="outline">{Math.round(profile.gold_accuracy * 100)}% gold accuracy</Tag>}
+          {profile.gold_accuracy != null && <Tag tone="outline">{Math.round(profile.gold_accuracy * 100)}% accuracy</Tag>}
         </div>
         {(profile.expertise ?? []).length > 0 && (
           <div className="mt-4 flex flex-wrap gap-1">
@@ -56,9 +56,9 @@ export default function ReviewerProfile() {
       </header>
 
       <section className="py-8">
-        <Label>The Reviews · {reviews.length}</Label>
+        <Label>Reviews · {reviews.length}</Label>
         {reviews.length === 0 ? (
-          <p className="mt-4 font-body text-neutral-600">No published reviews yet.</p>
+          <p className="mt-4 font-body text-neutral-600">No reviews yet.</p>
         ) : (
           <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-0 border-l border-t border-ink">
             {reviews.map((r) => (

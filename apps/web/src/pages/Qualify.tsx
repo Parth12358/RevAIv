@@ -14,10 +14,10 @@ export default function Qualify() {
 
   return (
     <div className="max-w-2xl">
-      <Label className="text-editorial">Examination · Qualification Task</Label>
-      <h1 className="mt-3 font-serif font-black tracking-tighter text-4xl lg:text-5xl leading-[0.95]">Score within one point of the answer.</h1>
+      <Label className="text-editorial">Practice task</Label>
+      <h1 className="mt-3 font-serif font-black tracking-tighter text-4xl lg:text-5xl leading-[0.95]">Try a quick practice rating.</h1>
       <p className="mt-3 font-body text-lg text-neutral-700">
-        Grade this known-answer task against the rubric. Land within one point of the reference and you qualify.
+        Rate this answer. It helps you get a feel for how rating works.
       </p>
 
       <div className="mt-6 border border-ink p-6">
@@ -27,9 +27,9 @@ export default function Qualify() {
 
       {result ? (
         <div className={`mt-6 p-6 border-2 ${result.qualified ? "border-ink bg-ink text-paper" : "border-editorial text-editorial"}`}>
-          <div className="font-serif font-black text-3xl">{result.qualified ? "Qualified." : "Not qualified — try again."}</div>
+          <div className="font-serif font-black text-3xl">{result.qualified ? "Qualified." : "Close — try again."}</div>
           <p className="mt-2 font-mono text-sm">Delta from reference: {result.delta.toFixed(1)} points.</p>
-          {result.qualified && <button onClick={() => nav("/review")} className="mt-4 underline decoration-2 decoration-editorial underline-offset-4 label text-[0.7rem]">Go to the Review Desk →</button>}
+          {result.qualified && <button onClick={() => nav("/review")} className="mt-4 underline decoration-2 decoration-editorial underline-offset-4 label text-[0.7rem]">Start reviewing →</button>}
         </div>
       ) : (
         <div data-tour="qualify-form" className="mt-6 border border-ink p-6">

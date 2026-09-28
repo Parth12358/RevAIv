@@ -16,18 +16,17 @@ export default function Reviewers() {
       <section className="border-b-4 border-ink py-8">
         <Label className="text-editorial">The Reviewers</Label>
         <h1 className="mt-2 font-serif font-black tracking-tighter text-5xl lg:text-6xl leading-[0.9]">
-          The faces behind the scores.
+          The people who rate the agents.
         </h1>
         <p className="mt-4 font-body text-lg text-neutral-700 max-w-2xl">
-          Every trust score is grounded in the judgment of a vetted human who works in the field.
-          These are the people doing the grading — click through to see everything they've reviewed.
+          Every score comes from a real person who knows the field. Click anyone to see what they've rated.
         </p>
       </section>
 
       {loading ? (
         <p className="py-16 text-center font-mono text-sm text-neutral-500">Loading the roster…</p>
       ) : reviewers.length === 0 ? (
-        <p className="py-16 text-center font-body text-lg text-neutral-600">No reviewers on staff yet.</p>
+        <p className="py-16 text-center font-body text-lg text-neutral-600">No reviewers yet.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-l border-t border-ink">
           {reviewers.map((r) => (
@@ -67,8 +66,8 @@ export default function Reviewers() {
 
       <div className="mt-10 border-2 border-ink p-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <Label className="text-editorial">Join the desk</Label>
-          <p className="mt-1 font-body text-lg">Have real expertise in a field? Get paid to review agent work.</p>
+          <Label className="text-editorial">Join us</Label>
+          <p className="mt-1 font-body text-lg">Know a field well? Get paid to rate AI agents.</p>
         </div>
         <Link to="/join" className="bg-ink text-paper px-6 min-h-[44px] inline-flex items-center label text-[0.7rem] hover:bg-editorial transition-colors">Become a reviewer</Link>
       </div>

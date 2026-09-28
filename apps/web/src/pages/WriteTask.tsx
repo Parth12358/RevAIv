@@ -40,8 +40,8 @@ export default function WriteTask() {
 
   return (
     <div className="max-w-3xl">
-      <Label className="text-editorial">Write a Task</Label>
-      <h1 className="mt-2 font-serif font-black tracking-tighter text-4xl lg:text-5xl leading-[0.95]">Something you'd hand a junior colleague.</h1>
+      <Label className="text-editorial">Write a task</Label>
+      <h1 className="mt-2 font-serif font-black tracking-tighter text-4xl lg:text-5xl leading-[0.95]">A small job an agent should be able to do.</h1>
       <p className="mt-3 font-body text-lg text-neutral-700">Keep it answerable in <strong>under ten minutes</strong>, with a single checkable answer — a number, a named part, a verifiable fact.</p>
 
       <div className="mt-6 border-2 border-ink p-6 space-y-5">
