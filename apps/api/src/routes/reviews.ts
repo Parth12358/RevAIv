@@ -5,6 +5,7 @@ import type { Session } from "../lib/auth";
 import { requireAuth } from "../lib/auth";
 import { all, first, id, nowIso, run } from "../lib/db";
 import { updateReviewerAccuracy } from "../lib/reviewers";
+import { recomputeScore } from "../lib/score";
 
 type Vars = { Variables: { session: Session }; Bindings: Env };
 const app = new Hono<Vars>();
@@ -163,6 +164,19 @@ app.post("/", requireAuth(["reviewer", "admin"]), async (c) => {
   // Gold check feeds reviewer accuracy (within 1 point = pass).
   if (isGoldCheck && goldDelta !== null) {
     await updateReviewerAccuracy(c.env, session.userId, goldDelta <= 1);
+  }
+
+  // Bump the reviewer's review count so earnings/stats reflect real reviews.
+  await run(c.env, `UPDATE reviewer_stats SET reviews_count = reviews_count + 1 WHERE reviewer_id = ?1`, session.userId);
+
+  // Auto-recompute the reviewed agent's score so it updates live in the directory.
+  if (body.run_id && !isGoldCheck) {
+    const av = await first<{ agent_version_id: string }>(
+      c.env,
+      `SELECT agent_version_id FROM runs WHERE id = ?1`,
+      body.run_id,
+    );
+    if (av) c.executionCtx.waitUntil(recomputeScore(c.env, av.agent_version_id).then(() => {}).catch(() => {}));
   }
 
   return c.json({ ok: true, overall, is_gold_check: isGoldCheck });

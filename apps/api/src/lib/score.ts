@@ -113,7 +113,9 @@ export async function recomputeScore(env: Env, agentVersionId: string): Promise<
 
   const trust = 10 * (0.6 * q + 0.2 * c + 0.2 * s);
   const confidence = confidenceFor(tasks);
-  const published = confidence !== "low";
+  // Publish as soon as there is at least one reviewed task so scores appear
+  // live in the directory; low confidence is shown honestly until 5+ tasks.
+  const published = tasks >= 1;
 
   // Score-drop flag: compare with the previous published score for this version.
   const prev = await first<{ trust: number }>(
