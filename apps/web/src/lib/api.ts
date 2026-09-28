@@ -1,5 +1,7 @@
 // Typed fetch wrapper. In dev, Vite proxies /api -> the Worker on :8787.
-const BASE = "/api";
+// In production, set VITE_API_BASE to the deployed Worker URL (CORS is enabled
+// on the Worker), e.g. VITE_API_BASE=https://agent-trust-api.<subdomain>.workers.dev
+const BASE = import.meta.env.VITE_API_BASE ?? "/api";
 
 function token(): string | null {
   return localStorage.getItem("atl_token");
@@ -79,12 +81,12 @@ export interface Stats {
 export const api = {
   // auth
   signup: (email: string, password: string, role?: Role) =>
-    req<{ token: string; session: Session; membership_active: number }>("/auth/signup", {
+    req<{ token: string; session: Session; membership_active: number; onboarded: number }>("/auth/signup", {
       method: "POST",
       body: JSON.stringify({ email, password, role }),
     }),
   login: (email: string, password: string) =>
-    req<{ token: string; session: Session; membership_active: number }>("/auth/login", {
+    req<{ token: string; session: Session; membership_active: number; onboarded: number }>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     }),

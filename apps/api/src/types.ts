@@ -2,9 +2,7 @@
 
 export interface Env {
   DB: D1Database;
-  OUTPUTS: R2Bucket;
   SESSIONS: KVNamespace;
-  RUN_QUEUE: Queue<RunMessage>;
 
   // vars
   APP_BASE_URL: string;

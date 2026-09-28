@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
-import { MdButton, FilledField, Blobs } from "../components/md";
+import { Button, Field, Label } from "../components/ui";
 
 export default function Login() {
   const { session, login } = useAuth();
@@ -29,22 +29,19 @@ export default function Login() {
   }
 
   return (
-    <div className="md min-h-screen relative grid place-items-center px-4">
-      <Blobs />
-      <div className="relative w-full max-w-md bg-md-surface rounded-md-3xl shadow-md p-8">
-        <Link to="/" className="font-roboto text-sm text-md-primary hover:underline">← The Agent Trust Ledger</Link>
-        <h1 className="mt-4 font-roboto text-3xl font-medium text-md-on">Welcome back</h1>
-        <p className="mt-1 font-roboto text-md-on-variant">Sign in to the platform.</p>
-        <form onSubmit={submit} className="mt-6 space-y-4">
-          <FilledField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" required />
-          <FilledField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required />
-          {err && <p className="text-md-error text-sm font-roboto">{err}</p>}
-          <MdButton type="submit" disabled={busy} className="w-full h-12">
-            {busy ? "Signing in…" : "Sign in"}
-          </MdButton>
+    <div className="newsprint min-h-screen grid place-items-center px-4">
+      <div className="w-full max-w-md border-4 border-ink bg-paper p-8">
+        <Link to="/" className="label text-[0.6rem] hover:text-editorial">← The Agent Trust Ledger</Link>
+        <h1 className="mt-4 font-serif font-black tracking-tighter text-4xl leading-[0.95]">Sign in.</h1>
+        <p className="mt-2 font-body text-neutral-600">Access the working desk.</p>
+        <form onSubmit={submit} className="mt-6 space-y-5">
+          <Field label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" required />
+          <Field label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
+          {err && <p className="font-mono text-xs text-editorial">{err}</p>}
+          <Button type="submit" disabled={busy} className="w-full">{busy ? "Signing in…" : "Sign in"}</Button>
         </form>
-        <p className="mt-6 text-center font-roboto text-sm text-md-on-variant">
-          New here? <Link to="/join" className="text-md-primary hover:underline">Create an account</Link>
+        <p className="mt-6 font-body text-sm text-neutral-600">
+          New here? <Link to="/join" className="underline decoration-2 decoration-editorial underline-offset-4">Create an account</Link>
         </p>
       </div>
     </div>

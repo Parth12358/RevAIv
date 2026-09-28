@@ -107,3 +107,64 @@ export function Meter({ label, value }: { label: string; value: number | null })
     </div>
   );
 }
+
+// ---- Newsprint form atoms ----
+const fieldCls =
+  "w-full border-b-2 border-ink bg-transparent px-3 py-2 font-mono text-sm focus:bg-[#F0F0F0] focus:outline-none";
+
+export function Field({ label, ...props }: { label?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <label className="block">
+      {label && <Label className="block mb-1">{label}</Label>}
+      <input className={fieldCls} {...props} />
+    </label>
+  );
+}
+
+export function Select({
+  label,
+  children,
+  ...props
+}: { label?: string } & React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <label className="block">
+      {label && <Label className="block mb-1">{label}</Label>}
+      <select className={fieldCls} {...props}>
+        {children}
+      </select>
+    </label>
+  );
+}
+
+export function TextArea({ label, ...props }: { label?: string } & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <label className="block">
+      {label && <Label className="block mb-1">{label}</Label>}
+      <textarea className="w-full border-2 border-ink bg-transparent px-3 py-2 font-body text-sm focus:bg-[#F0F0F0] focus:outline-none" {...props} />
+    </label>
+  );
+}
+
+export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`border border-ink bg-paper p-6 ${className}`}>{children}</div>;
+}
+
+// Small bordered/inverted tag (uppercase mono).
+export function Tag({
+  children,
+  tone = "outline",
+}: {
+  children: ReactNode;
+  tone?: "outline" | "solid" | "editorial";
+}) {
+  const styles = {
+    outline: "border border-ink text-ink",
+    solid: "bg-ink text-paper",
+    editorial: "bg-editorial text-paper",
+  }[tone];
+  return (
+    <span className={`inline-flex items-center px-2 py-1 font-mono text-[0.55rem] uppercase tracking-widest ${styles}`}>
+      {children}
+    </span>
+  );
+}

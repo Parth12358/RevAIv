@@ -2,15 +2,14 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { api } from "../lib/api";
-import { MdCard, MdButton, MdLinkButton, Chip } from "../components/md";
+import { Label, LinkButton, Tag, Ornament } from "../components/ui";
 
-function ActionCard({ to, title, desc, external }: { to: string; title: string; desc: string; external?: boolean }) {
+function ActionCard({ to, title, desc }: { to: string; title: string; desc: string }) {
   return (
-    <Link to={to}>
-      <MdCard interactive className="h-full">
-        <div className="font-roboto font-medium text-lg text-md-on">{title} {external && "↗"}</div>
-        <p className="mt-1 font-roboto text-sm text-md-on-variant">{desc}</p>
-      </MdCard>
+    <Link to={to} className="group border-r border-b border-ink p-6 hover:bg-neutral-100 transition-colors block hard-shadow-hover">
+      <div className="font-serif font-bold text-2xl group-hover:text-editorial transition-colors">{title}</div>
+      <p className="mt-1 font-body text-neutral-600">{desc}</p>
+      <div className="mt-4 label text-[0.6rem] text-neutral-500 group-hover:text-editorial">Open →</div>
     </Link>
   );
 }
@@ -28,98 +27,95 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="flex items-center gap-3">
-        <h1 className="font-roboto text-4xl font-medium text-md-on">Dashboard</h1>
-        <Chip tone="primary">{role}</Chip>
+      <div className="border-b-4 border-ink pb-6 flex items-end justify-between gap-4">
+        <div>
+          <Label className="text-editorial">The Working Desk</Label>
+          <h1 className="mt-2 font-serif font-black tracking-tighter text-5xl lg:text-6xl leading-[0.9]">Dashboard</h1>
+        </div>
+        <Tag tone="solid">{role}</Tag>
       </div>
-      <p className="mt-1 font-roboto text-md-on-variant">Welcome back, {session?.email}.</p>
+      <p className="mt-4 font-body text-lg text-neutral-700">Welcome back, {session?.email}.</p>
 
       {/* CUSTOMER */}
       {role === "member" && (
-        <div className="mt-8 space-y-6">
-          <MdCard className={membershipActive ? "" : "bg-md-primary text-white"}>
+        <div className="mt-8">
+          <div className={`p-6 border-2 ${membershipActive ? "border-ink" : "border-editorial bg-ink text-paper"}`}>
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <div className="font-roboto text-sm opacity-80">Membership</div>
-                <div className="font-roboto text-2xl font-medium">
+                <Label className={membershipActive ? "" : "text-neutral-400"}>Membership</Label>
+                <div className="mt-1 font-serif font-bold text-2xl">
                   {membershipActive ? "Active — full directory access" : "Not active — subscribe to browse"}
                 </div>
               </div>
               {membershipActive ? (
-                <MdLinkButton to="/directory" variant="tonal">Browse the directory ↗</MdLinkButton>
+                <LinkButton to="/directory">Browse the directory</LinkButton>
               ) : (
-                <MdLinkButton to="/account" variant="tonal">Subscribe · $200/mo</MdLinkButton>
+                <Link to="/account" className="bg-paper text-ink px-6 min-h-[44px] inline-flex items-center label text-[0.7rem] hover:bg-editorial hover:text-paper transition-colors">Subscribe · $200/mo</Link>
               )}
             </div>
-          </MdCard>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <ActionCard to="/directory" external title="The Directory" desc="Browse vetted agents and their trust scores." />
-            <ActionCard to="/submit" title="Submit an agent" desc="Get a trust score for an agent you're considering." />
-            <ActionCard to="/account" title="Account & billing" desc="Manage your membership." />
+          </div>
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 border-l border-t border-ink">
+            <ActionCard to="/directory" title="The Directory" desc="Browse vetted agents and their trust scores." />
+            <ActionCard to="/submit" title="Submit an Agent" desc="Get a trust score for an agent you're considering." />
+            <ActionCard to="/account" title="Account & Billing" desc="Manage your membership." />
           </div>
         </div>
       )}
 
       {/* REVIEWER */}
       {role === "reviewer" && (
-        <div className="mt-8 space-y-6">
-          <MdCard>
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <div className="font-roboto text-sm text-md-on-variant">Reviewer status</div>
-                <div className="font-roboto text-2xl font-medium text-md-on">
-                  {rstats?.qualified ? "Qualified" : "Not yet qualified"}
-                </div>
-                <div className="mt-1 flex gap-2">
-                  <Chip tone={rstats?.paused ? "error" : "success"}>{rstats?.paused ? "Paused" : "Active"}</Chip>
-                  <Chip>{Math.round((rstats?.gold_accuracy ?? 0) * 100)}% gold accuracy</Chip>
-                  <Chip>{rstats?.reviews_count ?? 0} reviews</Chip>
-                </div>
+        <div className="mt-8">
+          <div className="p-6 border-2 border-ink flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <Label>Reviewer Status</Label>
+              <div className="mt-1 font-serif font-bold text-2xl">{rstats?.qualified ? "Qualified" : "Not yet qualified"}</div>
+              <div className="mt-2 flex gap-2">
+                <Tag tone={rstats?.paused ? "editorial" : "outline"}>{rstats?.paused ? "Paused" : "Active"}</Tag>
+                <Tag>{Math.round((rstats?.gold_accuracy ?? 0) * 100)}% gold</Tag>
+                <Tag>{rstats?.reviews_count ?? 0} reviews</Tag>
               </div>
-              {rstats?.qualified ? (
-                <MdLinkButton to="/review">Go to the Review Desk</MdLinkButton>
-              ) : (
-                <MdLinkButton to="/qualify">Take qualification</MdLinkButton>
-              )}
             </div>
-          </MdCard>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {rstats?.qualified ? <LinkButton to="/review">Go to the Review Desk</LinkButton> : <LinkButton to="/qualify">Take qualification</LinkButton>}
+          </div>
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 border-l border-t border-ink">
             <ActionCard to="/review" title="Review Desk" desc="Claim blind outputs and score them against the rubric." />
-            <ActionCard to="/write-task" title="Write a task" desc="Author tasks from your field with the answer you'd expect." />
-            <ActionCard to="/account" title="Your profile" desc="Update your expertise and public bio." />
+            <ActionCard to="/write-task" title="Write a Task" desc="Author tasks from your field with the answer you'd expect." />
+            <ActionCard to="/account" title="Your Profile" desc="See your expertise and public bio." />
           </div>
         </div>
       )}
 
       {/* ADMIN */}
       {role === "admin" && (
-        <div className="mt-8 space-y-6">
+        <div className="mt-8">
           {overview && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 border-l border-t border-ink">
               {[
                 ["Customers", overview.customers],
                 ["Reviewers", overview.reviewers],
-                ["Paying members", overview.paying],
+                ["Paying", overview.paying],
                 ["Agents", overview.agents],
                 ["Runs done", overview.runs_done],
                 ["Reviews", overview.reviews],
                 ["Tasks pending", overview.tasks_pending],
-                ["Revenue (demo)", `$${overview.revenue}`],
+                ["Revenue", `$${overview.revenue}`],
               ].map(([k, v]) => (
-                <MdCard key={k as string}>
-                  <div className="font-roboto text-sm text-md-on-variant">{k}</div>
-                  <div className="mt-1 font-roboto text-3xl font-medium text-md-on">{v}</div>
-                </MdCard>
+                <div key={k as string} className="border-r border-b border-ink p-4">
+                  <Label className="text-[0.55rem] text-neutral-500">{k}</Label>
+                  <div className="mt-1 font-mono text-3xl">{v}</div>
+                </div>
               ))}
             </div>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <ActionCard to="/admin" title="Admin console" desc="Users, agents, tasks, reviews, listing controls, manual runs." />
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 border-l border-t border-ink">
+            <ActionCard to="/admin" title="Admin Console" desc="Users, agents, tasks, reviews, listing controls, manual runs." />
             <ActionCard to="/review" title="Review Desk" desc="Review outputs yourself." />
-            <ActionCard to="/directory" external title="The Directory" desc="See the public-facing ledger." />
+            <ActionCard to="/directory" title="The Directory" desc="See the public-facing ledger." />
           </div>
         </div>
       )}
+
+      <Ornament />
     </div>
   );
 }

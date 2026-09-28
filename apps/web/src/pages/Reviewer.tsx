@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, type ReviewTarget } from "../lib/api";
-import { MdCard, MdButton, MdLinkButton, Chip } from "../components/md";
+import { Label, Button, LinkButton, Tag, Ornament } from "../components/ui";
 import { RubricForm } from "../components/RubricForm";
 
 export default function Reviewer() {
@@ -33,78 +33,79 @@ export default function Reviewer() {
 
   return (
     <div>
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="border-b-4 border-ink pb-4 flex items-end justify-between flex-wrap gap-4">
         <div>
-          <h1 className="font-roboto text-4xl font-medium text-md-on">Review Desk</h1>
-          <p className="mt-1 font-roboto text-md-on-variant">Claim a blind output and score it against the rubric.</p>
+          <Label className="text-editorial">The Review Desk</Label>
+          <h1 className="mt-2 font-serif font-black tracking-tighter text-5xl leading-[0.9]">Claim &amp; Judge</h1>
         </div>
         {stats && (
           <div className="flex gap-2">
-            <Chip tone={stats.paused ? "error" : "success"}>{stats.paused ? "Paused" : "Active"}</Chip>
-            <Chip>{Math.round((stats.gold_accuracy ?? 0) * 100)}% gold</Chip>
-            <Chip>{stats.reviews_count ?? 0} reviews</Chip>
+            <Tag tone={stats.paused ? "editorial" : "outline"}>{stats.paused ? "Paused" : "Active"}</Tag>
+            <Tag>{Math.round((stats.gold_accuracy ?? 0) * 100)}% gold</Tag>
+            <Tag>{stats.reviews_count ?? 0} reviews</Tag>
           </div>
         )}
       </div>
 
       {needQual && (
-        <MdCard className="mt-8 bg-md-primary text-white">
-          <div className="font-roboto text-xl font-medium">Qualification required</div>
-          <p className="mt-1 opacity-90 font-roboto">Pass a known-answer task before reviewing paid work.</p>
-          <div className="mt-4"><MdLinkButton to="/qualify" variant="tonal">Take qualification</MdLinkButton></div>
-        </MdCard>
-      )}
-
-      {message && !needQual && (
-        <MdCard className="mt-8 text-center">
-          <p className="font-roboto text-md-on-variant">{message}</p>
-          <div className="mt-4"><MdButton variant="outlined" onClick={claim}>Refresh queue</MdButton></div>
-        </MdCard>
-      )}
-
-      {toast && (
-        <MdCard className="mt-8 bg-md-secondary-container">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <span className="font-roboto text-md-on-secondary-container">{toast}</span>
-            <MdButton onClick={claim}>Claim next</MdButton>
-          </div>
-        </MdCard>
-      )}
-
-      {target && !toast && (
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <MdCard>
-            <div className="flex items-center gap-2">
-              <Chip tone="primary">Brief</Chip>
-              {target.kind === "gold" && <Chip>hidden check</Chip>}
-            </div>
-            <p className="mt-3 font-roboto text-lg text-md-on">{target.prompt}</p>
-            <div className="mt-5">
-              <div className="font-roboto text-sm text-md-on-variant mb-2">Agent output</div>
-              <pre className="bg-md-surface-low rounded-2xl p-4 font-mono text-xs whitespace-pre-wrap max-h-96 overflow-auto text-md-on">
-                {typeof target.output === "string" ? target.output : JSON.stringify(target.output, null, 2)}
-              </pre>
-              <p className="mt-2 font-roboto text-xs text-md-on-variant">You cannot see which agent produced this output.</p>
-            </div>
-          </MdCard>
-          <MdCard>
-            <div className="font-roboto text-lg font-medium text-md-on mb-4">Score the rubric</div>
-            <RubricForm
-              rubric={target.rubric}
-              onSubmit={async (scores, reason) => {
-                const r = await api.submitReview({ run_id: target.run_id, task_id: target.task_id, scores, reason });
-                setTarget(null);
-                setToast(`Review recorded · overall ${r.overall.toFixed(1)}${r.is_gold_check ? " · (gold check)" : ""}.`);
-                api.reviewerStats().then((s) => setStats(s.stats)).catch(() => {});
-              }}
-            />
-          </MdCard>
+        <div className="mt-8 border-2 border-editorial bg-ink text-paper p-6">
+          <Label className="text-neutral-400">Qualification Required</Label>
+          <p className="mt-2 font-body text-lg">Pass a known-answer task before reviewing paid work.</p>
+          <div className="mt-4"><Link to="/qualify" className="bg-paper text-ink px-6 min-h-[44px] inline-flex items-center label text-[0.7rem] hover:bg-editorial hover:text-paper transition-colors">Take qualification</Link></div>
         </div>
       )}
 
-      <p className="mt-8 font-roboto text-sm text-md-on-variant">
-        Want to contribute a task from your field? <Link to="/write-task" className="text-md-primary hover:underline">Write a task →</Link>
+      {message && !needQual && (
+        <div className="mt-12 text-center">
+          <p className="font-mono text-sm text-neutral-500">{message}</p>
+          <div className="mt-4"><Button variant="secondary" onClick={claim}>Refresh queue</Button></div>
+        </div>
+      )}
+
+      {toast && (
+        <div className="mt-8 bg-ink text-paper p-4 flex items-center justify-between gap-4 flex-wrap">
+          <span className="font-mono text-sm">{toast}</span>
+          <Button onClick={claim}>Claim next</Button>
+        </div>
+      )}
+
+      {target && !toast && (
+        <div className="mt-8 grid grid-cols-12 gap-0">
+          <div className="col-span-12 lg:col-span-7 lg:border-r border-ink lg:pr-8">
+            <div className="flex items-center gap-2">
+              <Label>Brief</Label>
+              {target.kind === "gold" && <Tag>hidden check</Tag>}
+            </div>
+            <p className="mt-2 font-body text-lg leading-relaxed">{target.prompt}</p>
+            <div className="mt-6">
+              <Label>Agent Output · Fig. 1.1</Label>
+              <pre className="mt-2 border border-ink bg-neutral-100 p-4 font-mono text-xs whitespace-pre-wrap max-h-96 overflow-auto">
+                {typeof target.output === "string" ? target.output : JSON.stringify(target.output, null, 2)}
+              </pre>
+              <p className="mt-2 font-mono text-[0.65rem] text-neutral-500 uppercase tracking-widest">Reviewer is blind to which agent produced this output.</p>
+            </div>
+          </div>
+          <div className="col-span-12 lg:col-span-5 mt-8 lg:mt-0 lg:pl-8">
+            <Label>Score the Rubric</Label>
+            <div className="mt-4">
+              <RubricForm
+                rubric={target.rubric}
+                onSubmit={async (scores, reason) => {
+                  const r = await api.submitReview({ run_id: target.run_id, task_id: target.task_id, scores, reason });
+                  setTarget(null);
+                  setToast(`Review recorded · overall ${r.overall.toFixed(1)}${r.is_gold_check ? " · (gold check)" : ""}.`);
+                  api.reviewerStats().then((s) => setStats(s.stats)).catch(() => {});
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <p className="mt-8 font-body text-neutral-600">
+        Want to contribute a task from your field? <Link to="/write-task" className="underline decoration-2 decoration-editorial underline-offset-4">Write a task →</Link>
       </p>
+      <Ornament />
     </div>
   );
 }

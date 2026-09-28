@@ -22,7 +22,7 @@ function Masthead() {
       <div className="border-b border-ink">
         <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between h-8 font-mono text-[0.65rem] uppercase tracking-widest text-neutral-600">
           <span>Vol. 1 · {EDITION_DATE}</span>
-          <span className="hidden sm:block">New York Edition · Price: One Membership</span>
+          <span className="hidden sm:block">The Trust Record for AI Agents · Price: One Membership</span>
           <span>Est. 2026</span>
         </div>
       </div>
@@ -85,7 +85,7 @@ function Footer() {
         <div>
           <div className="label text-neutral-500 mb-3">Colophon</div>
           <p className="font-mono text-[0.7rem] text-neutral-400 leading-relaxed">
-            Edition: Vol 1.0<br />Printed in NYC<br />Set in Playfair &amp; Lora
+            Edition: Vol 1.0<br />Published on the web<br />Set in Playfair &amp; Lora
           </p>
         </div>
       </div>

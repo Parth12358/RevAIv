@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { api } from "../lib/api";
-import { MdButton, FilledField, MdCard, Chip } from "../components/md";
+import { Button, Field, Label, TextArea, Card } from "../components/ui";
 
 export default function Onboarding() {
   const { session, onboarded, refresh } = useAuth();
@@ -23,14 +23,11 @@ export default function Onboarding() {
   useEffect(() => {
     if (isReviewer) api.categories().then((r) => setCats(r.categories)).catch(() => {});
   }, [isReviewer]);
-
   useEffect(() => {
-    if (session?.role === "admin") nav("/app", { replace: true });
-    else if (onboarded) nav("/app", { replace: true });
+    if (session?.role === "admin" || onboarded) nav("/app", { replace: true });
   }, [onboarded, session]);
 
-  const toggle = (k: string) =>
-    setExpertise((xs) => (xs.includes(k) ? xs.filter((x) => x !== k) : [...xs, k]));
+  const toggle = (k: string) => setExpertise((xs) => (xs.includes(k) ? xs.filter((x) => x !== k) : [...xs, k]));
 
   async function submit() {
     setBusy(true);
@@ -56,77 +53,53 @@ export default function Onboarding() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <Chip tone="primary">{isReviewer ? "Reviewer onboarding" : "Customer onboarding"}</Chip>
-      <h1 className="mt-3 font-roboto text-4xl font-medium text-md-on">
-        {isReviewer ? "Set up your reviewer profile" : "Tell us about your team"}
+      <Label className="text-editorial">{isReviewer ? "Reviewer Onboarding" : "Customer Onboarding"}</Label>
+      <h1 className="mt-3 font-serif font-black tracking-tighter text-4xl lg:text-5xl leading-[0.95]">
+        {isReviewer ? "Set up your reviewer profile." : "Tell us about your team."}
       </h1>
-      <p className="mt-2 font-roboto text-md-on-variant">
+      <p className="mt-3 font-body text-lg text-neutral-700">
         {isReviewer
           ? "Your name and expertise appear next to every review you write — a face behind the score."
           : "This helps us recommend the right agents and tasks for your use case."}
       </p>
 
-      <MdCard className="mt-6">
-        <div className="space-y-5">
-          <FilledField label={isReviewer ? "Display name (public)" : "Your name"} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Jane Doe" />
-
-          {isReviewer ? (
-            <>
-              <FilledField label="Headline" value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="B2B SaaS GTM · ex-Outreach" />
-              <FilledField label="Country" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="United States" />
-              <div>
-                <span className="block mb-2 ml-1 text-sm font-roboto text-md-on-variant">Fields you can review</span>
-                <div className="flex flex-wrap gap-2">
-                  {cats.map((cat) => {
-                    const on = expertise.includes(cat.key);
-                    return (
-                      <button
-                        key={cat.key}
-                        type="button"
-                        onClick={() => toggle(cat.key)}
-                        className={`rounded-full px-4 h-9 text-sm font-roboto md-ease transition-all active:scale-95 ${
-                          on ? "bg-md-primary text-white" : "bg-md-surface-low text-md-on-variant hover:bg-md-primary/10"
-                        }`}
-                      >
-                        {cat.label}
-                      </button>
-                    );
-                  })}
-                </div>
+      <Card className="mt-6 space-y-5">
+        <Field label={isReviewer ? "Display name (public)" : "Your name"} value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Jane Doe" />
+        {isReviewer ? (
+          <>
+            <Field label="Headline" value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="B2B SaaS GTM · ex-Outreach" />
+            <Field label="Country" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="United States" />
+            <div>
+              <Label className="block mb-2">Fields you can review</Label>
+              <div className="flex flex-wrap gap-2">
+                {cats.map((cat) => {
+                  const on = expertise.includes(cat.key);
+                  return (
+                    <button
+                      key={cat.key}
+                      type="button"
+                      onClick={() => toggle(cat.key)}
+                      className={`px-3 py-2 font-mono text-[0.6rem] uppercase tracking-widest border border-ink transition-colors ${
+                        on ? "bg-ink text-paper" : "hover:bg-neutral-100"
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                })}
               </div>
-              <div>
-                <span className="block mb-1 ml-1 text-sm font-roboto text-md-on-variant">Short bio</span>
-                <textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  rows={3}
-                  placeholder="15 years in supply-chain planning; I judge operations and general-research tasks."
-                  className="w-full rounded-t-lg bg-md-surface-low border-b-2 border-md-outline focus:border-md-primary focus:outline-none p-3 font-roboto text-md-on"
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <FilledField label="Company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme Inc." />
-              <div>
-                <span className="block mb-1 ml-1 text-sm font-roboto text-md-on-variant">What are you trying to buy an agent for?</span>
-                <textarea
-                  value={useCase}
-                  onChange={(e) => setUseCase(e.target.value)}
-                  rows={3}
-                  placeholder="We need reliable lead research for outbound and want to compare vendors before committing budget."
-                  className="w-full rounded-t-lg bg-md-surface-low border-b-2 border-md-outline focus:border-md-primary focus:outline-none p-3 font-roboto text-md-on"
-                />
-              </div>
-            </>
-          )}
-
-          {err && <p className="text-md-error text-sm font-roboto">{err}</p>}
-          <MdButton onClick={submit} disabled={busy || !displayName} className="h-12">
-            {busy ? "Saving…" : "Finish setup"}
-          </MdButton>
-        </div>
-      </MdCard>
+            </div>
+            <TextArea label="Short bio" rows={3} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="15 years in supply-chain planning; I judge operations and general-research tasks." />
+          </>
+        ) : (
+          <>
+            <Field label="Company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Acme Inc." />
+            <TextArea label="What are you trying to buy an agent for?" rows={3} value={useCase} onChange={(e) => setUseCase(e.target.value)} placeholder="We need reliable lead research for outbound and want to compare vendors before committing budget." />
+          </>
+        )}
+        {err && <p className="font-mono text-xs text-editorial">{err}</p>}
+        <Button onClick={submit} disabled={busy || !displayName}>{busy ? "Saving…" : "Finish setup"}</Button>
+      </Card>
     </div>
   );
 }

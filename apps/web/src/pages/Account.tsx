@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../lib/auth";
 import { api } from "../lib/api";
-import { MdCard, MdButton, Chip } from "../components/md";
+import { Label, Button, Tag, Ornament } from "../components/ui";
 
 export default function Account() {
   const { session, membershipActive, refresh } = useAuth();
@@ -21,9 +21,8 @@ export default function Account() {
     setMsg(null);
     try {
       const r = await api.billingCheckout();
-      if (r.checkout_url) {
-        window.location.href = r.checkout_url;
-      } else if (r.dummy) {
+      if (r.checkout_url) window.location.href = r.checkout_url;
+      else if (r.dummy) {
         await api.dummyActivate();
         await refresh();
         setMsg("Membership activated (demo mode — no real charge).");
@@ -37,48 +36,47 @@ export default function Account() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="font-roboto text-4xl font-medium text-md-on">Account</h1>
-      <p className="mt-1 font-roboto text-md-on-variant">{session?.email} · <span className="capitalize">{session?.role}</span></p>
+      <Label className="text-editorial">Account</Label>
+      <h1 className="mt-2 font-serif font-black tracking-tighter text-5xl leading-[0.9]">Your account.</h1>
+      <p className="mt-3 font-mono text-xs uppercase tracking-widest text-neutral-500">{session?.email} · {session?.role}</p>
 
       {session?.role === "member" && (
-        <MdCard className="mt-6">
+        <div className="mt-6 p-6 border-2 border-ink">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <div className="font-roboto text-sm text-md-on-variant">Membership</div>
-              <div className="font-roboto text-2xl font-medium text-md-on flex items-center gap-2">
+              <Label>Membership</Label>
+              <div className="mt-1 font-serif font-bold text-3xl flex items-center gap-3">
                 {membershipActive ? "Active" : "Inactive"}
-                <Chip tone={membershipActive ? "success" : "error"}>{membershipActive ? "Full access" : "Locked"}</Chip>
+                <Tag tone={membershipActive ? "solid" : "editorial"}>{membershipActive ? "Full access" : "Locked"}</Tag>
               </div>
               {status && (
-                <p className="mt-1 font-roboto text-sm text-md-on-variant">
+                <p className="mt-2 font-mono text-xs text-neutral-500">
                   ${status.price_usd}/month · {status.stripe_configured ? "Stripe test mode" : "demo mode (no real charge)"}
                 </p>
               )}
             </div>
-            {!membershipActive && (
-              <MdButton onClick={subscribe} disabled={busy} className="h-12">
-                {busy ? "Redirecting…" : `Subscribe · $${status?.price_usd ?? 200}/mo`}
-              </MdButton>
-            )}
+            {!membershipActive && <Button onClick={subscribe} disabled={busy}>{busy ? "Redirecting…" : `Subscribe · $${status?.price_usd ?? 200}/mo`}</Button>}
           </div>
-          {msg && <p className="mt-4 font-roboto text-sm text-md-primary">{msg}</p>}
-        </MdCard>
+          {msg && <p className="mt-4 font-mono text-xs text-editorial">{msg}</p>}
+        </div>
       )}
 
       {(session?.role === "reviewer" || session?.role === "admin") && rstats && (
-        <MdCard className="mt-6">
-          <div className="font-roboto text-sm text-md-on-variant">Reviewer profile</div>
-          <div className="font-roboto text-2xl font-medium text-md-on">{rstats.display_name ?? "—"}</div>
-          {rstats.headline && <p className="font-roboto text-md-on-variant">{rstats.headline}</p>}
+        <div className="mt-6 p-6 border-2 border-ink">
+          <Label>Reviewer Profile</Label>
+          <div className="mt-1 font-serif font-bold text-3xl">{rstats.display_name ?? "—"}</div>
+          {rstats.headline && <p className="font-body text-neutral-600">{rstats.headline}</p>}
           <div className="mt-3 flex flex-wrap gap-2">
-            <Chip tone={rstats.qualified ? "success" : "error"}>{rstats.qualified ? "Qualified" : "Unqualified"}</Chip>
-            <Chip>{Math.round((rstats.gold_accuracy ?? 0) * 100)}% gold accuracy</Chip>
-            <Chip>{rstats.reviews_count ?? 0} reviews</Chip>
-            {(rstats.expertise ?? []).map((e: string) => <Chip key={e} tone="primary">{e.replace(/_/g, " ")}</Chip>)}
+            <Tag tone={rstats.qualified ? "solid" : "editorial"}>{rstats.qualified ? "Qualified" : "Unqualified"}</Tag>
+            <Tag>{Math.round((rstats.gold_accuracy ?? 0) * 100)}% gold accuracy</Tag>
+            <Tag>{rstats.reviews_count ?? 0} reviews</Tag>
+            {(rstats.expertise ?? []).map((e: string) => <Tag key={e}>{e.replace(/_/g, " ")}</Tag>)}
           </div>
-          {rstats.bio && <p className="mt-3 font-roboto text-md-on-variant">{rstats.bio}</p>}
-        </MdCard>
+          {rstats.bio && <p className="mt-3 font-body text-neutral-700">{rstats.bio}</p>}
+        </div>
       )}
+
+      <Ornament />
     </div>
   );
 }

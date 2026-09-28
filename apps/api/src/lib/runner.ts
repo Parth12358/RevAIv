@@ -1,12 +1,14 @@
-// Enqueue runs and execute queued runs (the Queue consumer body).
+// Create run rows and execute them. Outputs are stored in D1 (no R2); runs
+// execute inline via ctx.waitUntil (no Queues) so the app runs free.
 import type { Env, RunMessage, Task } from "../types";
 import { all, first, id, nowIso, run } from "./db";
 import { runAdapter, type AgentSpec } from "../adapters";
 import { decryptSecret } from "./crypto";
 
 // Create run rows (status=queued) for every active, non-gold task in the
-// agent's category, and enqueue a message per run. Returns the run count.
-export async function enqueueRunsForVersion(env: Env, agentVersionId: string): Promise<number> {
+// agent's category. Returns the RunMessages so the caller can execute them
+// (typically via ctx.waitUntil).
+export async function enqueueRunsForVersion(env: Env, agentVersionId: string): Promise<RunMessage[]> {
   const agent = await first<{ category: string }>(
     env,
     `SELECT a.category AS category
@@ -22,6 +24,7 @@ export async function enqueueRunsForVersion(env: Env, agentVersionId: string): P
     agent.category,
   );
 
+  const messages: RunMessage[] = [];
   for (const task of tasks) {
     const runId = id("run");
     await run(
@@ -32,22 +35,28 @@ export async function enqueueRunsForVersion(env: Env, agentVersionId: string): P
       task.id,
       nowIso(),
     );
-    const msg: RunMessage = { run_id: runId, agent_version_id: agentVersionId, task_id: task.id };
-    await env.RUN_QUEUE.send(msg);
+    messages.push({ run_id: runId, agent_version_id: agentVersionId, task_id: task.id });
   }
-  return tasks.length;
+  return messages;
 }
 
-// Execute a single queued run: call the adapter, store output in R2, record the
-// run row. Throws on failure so the queue can retry (up to max_retries).
+// Execute all messages, swallowing per-run errors (they are recorded on the row).
+export async function executeAll(env: Env, messages: RunMessage[]): Promise<void> {
+  for (const m of messages) {
+    await executeRun(env, m).catch(() => {});
+  }
+}
+
+// Execute a single queued run: call the adapter, store the output in D1, record
+// the run row. Throws on failure (the row is marked failed first).
 export async function executeRun(env: Env, msg: RunMessage): Promise<void> {
   const runRow = await first<{ id: string; attempts: number; status: string }>(
     env,
     `SELECT id, attempts, status FROM runs WHERE id = ?1`,
     msg.run_id,
   );
-  if (!runRow) return; // run was deleted; nothing to do
-  if (runRow.status === "done") return; // idempotent
+  if (!runRow) return;
+  if (runRow.status === "done") return;
 
   await run(
     env,
@@ -85,39 +94,21 @@ export async function executeRun(env: Env, msg: RunMessage): Promise<void> {
 
   try {
     const result = await runAdapter(env, spec, task);
-
-    const r2Key = `runs/${msg.run_id}.json`;
-    await env.OUTPUTS.put(
-      r2Key,
-      JSON.stringify({ output: result.output, run_id: msg.run_id, task_id: msg.task_id }),
-      { httpMetadata: { contentType: "application/json" } },
-    );
-
-    const preview =
-      typeof result.output === "string"
-        ? result.output.slice(0, 500)
-        : JSON.stringify(result.output).slice(0, 500);
-
+    const full = typeof result.output === "string" ? result.output : JSON.stringify(result.output);
     await run(
       env,
-      `UPDATE runs SET status='done', output_r2_key=?2, output_preview=?3, cost_usd=?4, duration_ms=?5, finished_at=?6, error=NULL
+      `UPDATE runs SET status='done', output_full=?2, output_preview=?3, cost_usd=?4, duration_ms=?5, finished_at=?6, error=NULL
          WHERE id=?1`,
       msg.run_id,
-      r2Key,
-      preview,
+      full,
+      full.slice(0, 500),
       result.costUsd,
       result.durationMs,
       nowIso(),
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    await run(
-      env,
-      `UPDATE runs SET status='failed', error=?2, finished_at=?3 WHERE id=?1`,
-      msg.run_id,
-      message,
-      nowIso(),
-    );
-    throw err; // surface for queue retry
+    await run(env, `UPDATE runs SET status='failed', error=?2, finished_at=?3 WHERE id=?1`, msg.run_id, message, nowIso());
+    throw err;
   }
 }

@@ -7,30 +7,13 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "agent-trust-db"
-database_id = "REPLACE_WITH_D1_ID"        # from: npx wrangler d1 create agent-trust-db
+database_id = "686985b9-84bd-4448-8aa4-bdbb3e5228bc"
 migrations_dir = "migrations"
-
-# ---- R2 (raw agent outputs) ----
-[[r2_buckets]]
-binding = "OUTPUTS"
-bucket_name = "agent-outputs"             # from: npx wrangler r2 bucket create agent-outputs
 
 # ---- KV (magic-link tokens + sessions) ----
 [[kv_namespaces]]
 binding = "SESSIONS"
-id = "REPLACE_WITH_KV_ID"                  # from: npx wrangler kv namespace create SESSIONS
-
-# ---- Queue: producer binding ----
-[[queues.producers]]
-binding = "RUN_QUEUE"
-queue = "runs"                             # from: npx wrangler queues create runs
-
-# ---- Queue: consumer (same Worker) ----
-[[queues.consumers]]
-queue = "runs"
-max_batch_size = 5
-max_retries = 3
-max_batch_timeout = 30
+id = "7be207ee08aa49edb8fa9f673c9bea43"
 
 # ---- Cron: daily re-test gate (monthly logic inside handler) ----
 [triggers]
@@ -43,7 +26,11 @@ API_BASE_URL = "http://localhost:8787"
 VETTING_PRICE_CENTS = "40000"
 MEMBERSHIP_PRICE_CENTS = "20000"
 # Sign up with this email to be granted the admin role.
-ADMIN_EMAIL = "admin@agenttrust.dev"
+ADMIN_EMAIL = "parth.kshirsagar1410@gmail.com"
 
 # Secrets (set via `npx wrangler secret put <NAME>`, or .dev.vars locally):
 #   CLAUDE_API_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, ENCRYPTION_KEY
+#
+# Note: R2 (agent-output blobs) and Queues (async run fan-out) were removed so
+# the app runs on the Cloudflare free plan. Outputs are stored in D1; enqueued
+# runs execute inline via ctx.waitUntil. Re-add both for scale (paid plan).

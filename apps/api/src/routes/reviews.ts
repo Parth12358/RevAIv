@@ -51,9 +51,9 @@ app.get("/next", requireAuth(["reviewer", "admin"]), async (c) => {
   }
 
   // Find a done run this reviewer hasn't reviewed yet.
-  const runRow = await first<{ id: string; task_id: string; output_r2_key: string | null; output_preview: string | null }>(
+  const runRow = await first<{ id: string; task_id: string; output_full: string | null; output_preview: string | null }>(
     c.env,
-    `SELECT r.id, r.task_id, r.output_r2_key, r.output_preview
+    `SELECT r.id, r.task_id, r.output_full, r.output_preview
        FROM runs r
       WHERE r.status = 'done'
         AND NOT EXISTS (SELECT 1 FROM reviews rv WHERE rv.run_id = r.id AND rv.reviewer_id = ?1)
@@ -69,15 +69,7 @@ app.get("/next", requireAuth(["reviewer", "admin"]), async (c) => {
     runRow.task_id,
   );
 
-  // Load full output from R2 (fall back to preview).
-  let output: unknown = runRow.output_preview;
-  if (runRow.output_r2_key) {
-    const obj = await c.env.OUTPUTS.get(runRow.output_r2_key);
-    if (obj) {
-      const parsed = (await obj.json()) as { output?: unknown };
-      output = parsed.output ?? output;
-    }
-  }
+  const output: unknown = runRow.output_full ?? runRow.output_preview;
 
   return c.json({
     review_target: {

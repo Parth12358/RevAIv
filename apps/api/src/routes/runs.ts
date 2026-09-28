@@ -1,26 +1,27 @@
-// Enqueue runs for an agent version (System/Cron/admin).
+// Enqueue runs (execute inline) and paste manual runs.
 import { Hono } from "hono";
 import type { Env } from "../types";
 import type { Session } from "../lib/auth";
 import { requireAuth } from "../lib/auth";
 import { all, first, id, nowIso, run } from "../lib/db";
-import { enqueueRunsForVersion } from "../lib/runner";
+import { enqueueRunsForVersion, executeAll } from "../lib/runner";
 import { isCategory } from "../lib/categories";
 
 type Vars = { Variables: { session: Session }; Bindings: Env };
 const app = new Hono<Vars>();
 
-// POST /runs/enqueue { agent_version_id }
+// POST /runs/enqueue { agent_version_id } — create run rows and execute them in
+// the background (ctx.waitUntil), then the caller can recompute the score.
 app.post("/enqueue", requireAuth(["admin"]), async (c) => {
   const { agent_version_id } = await c.req.json<{ agent_version_id: string }>();
   if (!agent_version_id) return c.json({ error: "agent_version_id required" }, 400);
-  const count = await enqueueRunsForVersion(c.env, agent_version_id);
-  return c.json({ enqueued: count });
+  const messages = await enqueueRunsForVersion(c.env, agent_version_id);
+  c.executionCtx.waitUntil(executeAll(c.env, messages));
+  return c.json({ enqueued: messages.length });
 });
 
 // POST /runs/manual — paste a web-app agent's output for a task. Creates the
-// agent/version if new and drops a completed run into the review queue so it is
-// indistinguishable from an API run to reviewers.
+// agent/version if new and drops a completed run into the review queue.
 app.post("/manual", requireAuth(["admin"]), async (c) => {
   const session = c.get("session");
   const body = await c.req.json<{
@@ -38,7 +39,6 @@ app.post("/manual", requireAuth(["admin"]), async (c) => {
   }
   const category = isCategory(body.category) ? body.category : "lead_research";
 
-  // Find-or-create the agent by name.
   let agent = await first<{ id: string }>(c.env, `SELECT id FROM agents WHERE name = ?1`, body.agent_name);
   let agentId = agent?.id;
   if (!agentId) {
@@ -73,18 +73,14 @@ app.post("/manual", requireAuth(["admin"]), async (c) => {
   }
 
   const runId = id("run");
-  const r2Key = `runs/${runId}.json`;
-  await c.env.OUTPUTS.put(r2Key, JSON.stringify({ output: body.output, run_id: runId, task_id: body.task_id }), {
-    httpMetadata: { contentType: "application/json" },
-  });
   await run(
     c.env,
-    `INSERT INTO runs (id, agent_version_id, task_id, status, output_r2_key, output_preview, cost_usd, duration_ms, is_manual, started_at, finished_at, created_at)
+    `INSERT INTO runs (id, agent_version_id, task_id, status, output_full, output_preview, cost_usd, duration_ms, is_manual, started_at, finished_at, created_at)
      VALUES (?1,?2,?3,'done',?4,?5,?6,?7,1,?8,?8,?8)`,
     runId,
     versionId,
     body.task_id,
-    r2Key,
+    body.output,
     body.output.slice(0, 500),
     body.cost_usd ?? null,
     body.duration_ms ?? null,

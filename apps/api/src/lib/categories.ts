@@ -12,6 +12,14 @@ export const CATEGORIES: { key: string; label: string }[] = [
   { key: "bookkeeping", label: "Bookkeeping" },
   { key: "travel_planning", label: "Travel planning" },
   { key: "general_research", label: "General research" },
+  { key: "translation", label: "Translation" },
+  { key: "teaching", label: "Teaching (K–12)" },
+  { key: "customer_support", label: "Customer support" },
+  { key: "data_analysis", label: "Data analysis" },
+  { key: "grant_writing", label: "Grant writing" },
+  { key: "real_estate", label: "Real estate" },
+  { key: "patents_ip", label: "Patents & IP" },
+  { key: "insurance", label: "Insurance (brokerage)" },
 ];
 
 export const CATEGORY_KEYS = CATEGORIES.map((c) => c.key);

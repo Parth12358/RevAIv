@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { api, type DirectoryAgent } from "../lib/api";
+import { api, ApiError, type DirectoryAgent } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { Label, LinkButton, ScoreBadge, Ornament } from "../components/ui";
 
 const SORTS = [
@@ -9,64 +10,71 @@ const SORTS = [
   { key: "speed", label: "Speed" },
 ];
 
+// Gate messaging when the API returns 401/402.
+function Gate({ kind }: { kind: "login" | "paywall" }) {
+  return (
+    <section className="newsprint-texture py-20 text-center border-b border-ink">
+      <Label className="text-editorial">{kind === "login" ? "Members Only" : "Subscription Required"}</Label>
+      <h1 className="mt-4 font-serif font-black tracking-tighter text-5xl lg:text-7xl leading-[0.9]">
+        {kind === "login" ? "Sign in to read the ledger." : "Subscribe to read the ledger."}
+      </h1>
+      <p className="mt-4 font-body text-lg text-neutral-700 max-w-xl mx-auto">
+        {kind === "login"
+          ? "The directory of vetted agents and their trust scores is for members."
+          : "Your account is active, but the directory requires a membership. It's $200/month for full access."}
+      </p>
+      <div className="mt-8 flex justify-center gap-4">
+        {kind === "login" ? (
+          <>
+            <LinkButton to="/join">Become a member</LinkButton>
+            <LinkButton to="/login" variant="secondary">Sign in</LinkButton>
+          </>
+        ) : (
+          <LinkButton to="/account">Subscribe · $200/mo</LinkButton>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function Directory() {
+  const { session } = useAuth();
   const [agents, setAgents] = useState<DirectoryAgent[]>([]);
+  const [cats, setCats] = useState<{ key: string; label: string }[]>([]);
   const [sort, setSort] = useState("trust");
+  const [category, setCategory] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [gate, setGate] = useState<"login" | "paywall" | null>(null);
+
+  useEffect(() => {
+    api.categories().then((r) => setCats(r.categories)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     setLoading(true);
-    api.directory(sort).then((r) => setAgents(r.agents)).finally(() => setLoading(false));
-  }, [sort]);
+    setGate(null);
+    api
+      .directory(sort, category || undefined)
+      .then((r) => setAgents(r.agents))
+      .catch((e) => {
+        if (e instanceof ApiError && (e.status === 401 || !session)) setGate("login");
+        else if (e instanceof ApiError && (e.status === 402 || e.paywall)) setGate("paywall");
+        else setGate(session ? "paywall" : "login");
+      })
+      .finally(() => setLoading(false));
+  }, [sort, category, session]);
 
-  const lead = agents[0];
+  if (gate) return <Gate kind={gate} />;
 
   return (
     <div>
-      {/* Hero */}
-      <section className="newsprint-texture border-b-4 border-ink py-10 lg:py-16">
-        <div className="grid grid-cols-12 gap-0">
-          <div className="col-span-12 lg:col-span-8 lg:border-r border-ink lg:pr-10">
-            <Label className="text-editorial">Breaking · The Trust Problem</Label>
-            <h1 className="mt-4 font-serif font-black tracking-tighter leading-[0.9] text-5xl sm:text-6xl lg:text-8xl">
-              A Costco membership for AI agents.
-            </h1>
-            <p className="drop-cap mt-6 font-body text-lg leading-relaxed text-neutral-700 max-w-2xl text-justify">
-              Businesses cannot tell which agents actually deliver. We publish a single trust
-              score — quality, cost and speed — for a specific kind of task, grounded in the
-              judgment of vetted human reviewers and re-tested on every agent update. Browse
-              agents we have already vetted, or submit one you are considering.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <LinkButton to="/submit">Submit an Agent</LinkButton>
-              <LinkButton to="/reviewer" variant="secondary">Become a Reviewer</LinkButton>
-            </div>
-          </div>
-          {/* Lead story: top-ranked agent */}
-          <div className="col-span-12 lg:col-span-4 mt-8 lg:mt-0 lg:pl-10">
-            <Label>Top of the Ledger</Label>
-            {lead ? (
-              <Link to={`/agents/${lead.id}`} className="block mt-4 group">
-                <div className="flex items-start justify-between gap-4">
-                  <h2 className="font-serif font-bold text-3xl leading-tight group-hover:text-editorial transition-colors">
-                    {lead.name}
-                  </h2>
-                  <ScoreBadge trust={lead.trust} confidence={lead.confidence} size="md" />
-                </div>
-                <p className="mt-3 font-mono text-xs uppercase tracking-widest text-neutral-500">
-                  {lead.adapter_type.replace("_", " ")} · {lead.category.replace("_", " ")}
-                </p>
-              </Link>
-            ) : (
-              <p className="mt-4 font-body text-neutral-500">No agents scored yet.</p>
-            )}
-          </div>
+      <section className="border-b-4 border-ink py-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <Label className="text-editorial">The Directory</Label>
+          <h1 className="mt-2 font-serif font-black tracking-tighter text-5xl lg:text-6xl leading-[0.9]">
+            Vetted agents, ranked.
+          </h1>
         </div>
-      </section>
-
-      {/* Sort controls */}
-      <div className="flex items-center justify-between py-6 border-b border-ink">
-        <Label>The Directory · Lead Research</Label>
         <div className="flex items-center gap-4">
           <span className="label text-[0.6rem] text-neutral-500">Rank by</span>
           {SORTS.map((s) => (
@@ -81,11 +89,25 @@ export default function Directory() {
             </button>
           ))}
         </div>
+      </section>
+
+      {/* Field filter */}
+      <div className="py-4 border-b border-ink flex flex-wrap gap-x-6 gap-y-2">
+        <button onClick={() => setCategory("")} className={`label text-[0.65rem] ${category === "" ? "text-editorial" : "hover:text-editorial"}`}>All fields</button>
+        {cats.map((c) => (
+          <button key={c.key} onClick={() => setCategory(c.key)} className={`label text-[0.65rem] ${category === c.key ? "text-editorial" : "hover:text-editorial"}`}>
+            {c.label}
+          </button>
+        ))}
       </div>
 
-      {/* Agent grid — collapsed borders */}
       {loading ? (
         <p className="py-16 text-center font-mono text-sm text-neutral-500">Setting type…</p>
+      ) : agents.length === 0 ? (
+        <div className="py-16 text-center">
+          <p className="font-body text-lg text-neutral-600">No agents scored in this field yet.</p>
+          <p className="mt-2 font-mono text-xs text-neutral-500">Submit one, or check back after the next review round.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-l border-t border-ink">
           {agents.map((a) => (
@@ -96,19 +118,15 @@ export default function Directory() {
             >
               <div>
                 <div className="flex items-start justify-between gap-4">
-                  <h3 className="font-serif font-bold text-2xl leading-tight group-hover:text-editorial transition-colors">
-                    {a.name}
-                  </h3>
+                  <h3 className="font-serif font-bold text-2xl leading-tight group-hover:text-editorial transition-colors">{a.name}</h3>
                   <ScoreBadge trust={a.trust} confidence={a.confidence} size="sm" />
                 </div>
                 {a.flagged_drop === 1 && (
-                  <span className="inline-block mt-3 bg-editorial text-paper label text-[0.55rem] px-2 py-1">
-                    Score dropped 10+
-                  </span>
+                  <span className="inline-block mt-3 bg-editorial text-paper label text-[0.55rem] px-2 py-1">Score dropped 10+</span>
                 )}
               </div>
               <div className="mt-4 pt-4 border-t border-divider flex items-center justify-between font-mono text-[0.65rem] uppercase tracking-widest text-neutral-500">
-                <span>{a.adapter_type.replace("_", " ")}</span>
+                <span>{a.category.replace(/_/g, " ")}</span>
                 <span className="group-hover:text-editorial">Read →</span>
               </div>
             </Link>

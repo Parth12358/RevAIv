@@ -1,28 +1,35 @@
-// Internal platform shell (Material You): app bar + role-aware nav + blobs.
+// Internal platform shell — Newsprint, consistent with the public masthead.
 import type { ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
-import { Chip } from "./md";
 
 const NAV: Record<string, { to: string; label: string; external?: boolean }[]> = {
   member: [
     { to: "/app", label: "Dashboard" },
-    { to: "/directory", label: "Directory", external: true },
+    { to: "/directory", label: "The Directory" },
     { to: "/submit", label: "Submit Agent" },
     { to: "/account", label: "Account" },
   ],
   reviewer: [
     { to: "/app", label: "Dashboard" },
     { to: "/review", label: "Review Desk" },
+    { to: "/write-task", label: "Write a Task" },
     { to: "/account", label: "Account" },
   ],
   admin: [
     { to: "/app", label: "Dashboard" },
     { to: "/admin", label: "Admin" },
-    { to: "/directory", label: "Directory", external: true },
+    { to: "/directory", label: "The Directory" },
     { to: "/submit", label: "Submit Agent" },
   ],
 };
+
+const EDITION_DATE = new Date().toLocaleDateString("en-US", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { session, logout } = useAuth();
@@ -30,67 +37,47 @@ export function AppShell({ children }: { children: ReactNode }) {
   const links = NAV[session?.role ?? "member"] ?? NAV.member;
 
   return (
-    <div className="md min-h-screen relative">
-      {/* App bar */}
-      <header className="sticky top-0 z-40 bg-md-bg/80 backdrop-blur-md border-b border-md-surface-low">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-6">
-            <Link to="/app" className="font-roboto font-medium text-lg text-md-on flex items-center gap-2">
-              <span className="h-8 w-8 rounded-full bg-md-primary text-white grid place-items-center text-sm">AT</span>
-              Trust Platform
-            </Link>
-            <nav className="hidden md:flex items-center gap-1">
-              {links.map((l) =>
-                l.external ? (
-                  <Link
-                    key={l.to}
-                    to={l.to}
-                    className="rounded-full px-4 h-9 inline-flex items-center font-roboto text-sm text-md-on-variant hover:bg-md-primary/10 md-ease transition-colors"
-                  >
-                    {l.label} ↗
-                  </Link>
-                ) : (
-                  <NavLink
-                    key={l.to}
-                    to={l.to}
-                    end={l.to === "/app"}
-                    className={({ isActive }) =>
-                      `rounded-full px-4 h-9 inline-flex items-center font-roboto text-sm md-ease transition-colors ${
-                        isActive ? "bg-md-secondary-container text-md-on-secondary-container" : "text-md-on-variant hover:bg-md-primary/10"
-                      }`
-                    }
-                  >
-                    {l.label}
-                  </NavLink>
-                ),
-              )}
-            </nav>
-          </div>
-          <div className="flex items-center gap-3">
-            {session && (
-              <>
-                <span className="hidden sm:block"><Chip tone="primary">{session.role}</Chip></span>
-                <span className="hidden lg:block font-roboto text-sm text-md-on-variant">{session.email}</span>
-                <button
-                  onClick={() => { logout(); nav("/"); }}
-                  className="rounded-full px-4 h-9 font-roboto text-sm text-md-primary hover:bg-md-primary/10 md-ease transition-colors active:scale-95"
-                >
-                  Sign out
-                </button>
-              </>
-            )}
+    <div className="newsprint min-h-screen flex flex-col">
+      <header className="sticky top-0 z-40 bg-paper border-b-4 border-ink">
+        <div className="border-b border-ink">
+          <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between h-8 font-mono text-[0.65rem] uppercase tracking-widest text-neutral-600">
+            <span>Vol. 1 · {EDITION_DATE}</span>
+            <span className="hidden sm:block">The Working Desk · {session?.role} edition</span>
+            <span>Est. 2026</span>
           </div>
         </div>
+        <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <Link to="/app" className="font-serif font-black tracking-tighter leading-none text-2xl sm:text-3xl">
+            The Agent Trust Ledger
+          </Link>
+          <div className="flex items-center gap-4">
+            <span className="hidden sm:inline label text-[0.6rem] text-neutral-500">{session?.role} · {session?.email}</span>
+            <button
+              onClick={() => { logout(); nav("/"); }}
+              className="label text-[0.65rem] text-ink hover:text-editorial transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+        <nav className="border-t border-ink">
+          <div className="max-w-screen-xl mx-auto px-4 flex flex-wrap">
+            {links.map((l) => (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                end={l.to === "/app"}
+                className={({ isActive }) =>
+                  `label text-[0.7rem] py-3 pr-8 transition-colors ${isActive ? "text-editorial" : "text-ink hover:text-editorial"}`
+                }
+              >
+                {l.label}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
       </header>
-
-      {/* Content with atmospheric blobs */}
-      <div className="relative">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <div className="md-blob bg-md-primary w-[30rem] h-[30rem] -top-40 -left-32 opacity-20" />
-          <div className="md-blob bg-md-tertiary w-[26rem] h-[26rem] top-96 -right-32 opacity-20" />
-        </div>
-        <main className="relative max-w-6xl mx-auto px-4 py-8">{children}</main>
-      </div>
+      <main className="flex-1 max-w-screen-xl mx-auto w-full px-4 py-8">{children}</main>
     </div>
   );
 }

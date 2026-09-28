@@ -3,7 +3,7 @@ import { Hono } from "hono";
 import type { Env } from "../types";
 import { first, nowIso, run } from "../lib/db";
 import { verifyWebhook } from "../lib/stripe";
-import { enqueueRunsForVersion } from "../lib/runner";
+import { enqueueRunsForVersion, executeAll } from "../lib/runner";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -29,7 +29,8 @@ app.post("/stripe", async (c) => {
           (obj.id as string) ?? null,
         );
       }
-      await enqueueRunsForVersion(c.env, metadata.agent_version_id);
+      const messages = await enqueueRunsForVersion(c.env, metadata.agent_version_id);
+      c.executionCtx.waitUntil(executeAll(c.env, messages));
     } else if (metadata.type === "membership" && metadata.user_id) {
       await run(c.env, `UPDATE users SET membership_active=1 WHERE id=?1`, metadata.user_id);
     }

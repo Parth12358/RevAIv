@@ -3,7 +3,7 @@
 // the monthly gate lives here.
 import type { Env } from "./types";
 import { all } from "./lib/db";
-import { enqueueRunsForVersion } from "./lib/runner";
+import { enqueueRunsForVersion, executeAll } from "./lib/runner";
 import { recomputeScore } from "./lib/score";
 
 const RETEST_AFTER_DAYS = 30;
@@ -22,7 +22,8 @@ export async function runScheduled(env: Env): Promise<void> {
   );
 
   for (const v of due) {
-    await enqueueRunsForVersion(env, v.id);
+    const messages = await enqueueRunsForVersion(env, v.id);
+    await executeAll(env, messages);
   }
 
   // Recompute scores for all versions that already have reviews (drop-flagging

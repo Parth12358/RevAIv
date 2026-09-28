@@ -11,8 +11,8 @@ type Vars = { Variables: { session: Session }; Bindings: Env };
 const app = new Hono<Vars>();
 
 // GET /agents?category=&sort=  — directory with latest published score.
-// Gated: customers need an active membership; reviewers/admins bypass.
-app.get("/", requireMembership(), async (c) => {
+// Public for the demo so anyone can browse the ledger.
+app.get("/", async (c) => {
   const category = c.req.query("category");
   const sort = c.req.query("sort") ?? "trust"; // trust | cost | speed
 
