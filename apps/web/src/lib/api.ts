@@ -143,6 +143,7 @@ export const api = {
   reviewerStats: () => req<{ stats: any }>("/reviewers/me"),
 
   reviewersPublic: () => req<{ reviewers: any[] }>("/reviewers/public"),
+  reviewerProfile: (id: string) => req<{ profile: any; reviews: any[] }>(`/reviewers/${id}/public`),
 
   // categories + task authoring
   categories: () => req<{ categories: { key: string; label: string }[] }>("/tasks/categories"),

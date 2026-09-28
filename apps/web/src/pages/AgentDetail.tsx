@@ -196,7 +196,11 @@ export default function AgentDetail() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-serif font-bold text-lg flex items-center gap-2">
-                      {r.reviewer_name ?? "Anonymous reviewer"}
+                      {r.reviewer_id ? (
+                        <Link to={`/reviewers/${r.reviewer_id}`} className="hover:text-editorial transition-colors">{r.reviewer_name ?? "Anonymous reviewer"}</Link>
+                      ) : (
+                        r.reviewer_name ?? "Anonymous reviewer"
+                      )}
                       {r.reviewer_linkedin && (
                         <a href={r.reviewer_linkedin} target="_blank" rel="noreferrer" className="font-mono text-[0.55rem] uppercase tracking-widest text-editorial hover:underline">in ↗</a>
                       )}

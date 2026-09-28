@@ -16,6 +16,7 @@ function Masthead() {
   const links = [
     { to: "/", label: "Front Page", end: true },
     { to: "/directory", label: "The Directory" },
+    { to: "/reviewers", label: "The Reviewers" },
   ];
   return (
     <header className="sticky top-0 z-40 bg-paper border-b-4 border-ink">
@@ -79,6 +80,7 @@ function Footer() {
           <ul className="space-y-2 font-sans text-sm">
             <li><Link to="/" className="hover:text-editorial">Front Page</Link></li>
             <li><Link to="/directory" className="hover:text-editorial">The Directory</Link></li>
+            <li><Link to="/reviewers" className="hover:text-editorial">The Reviewers</Link></li>
             <li><Link to="/join" className="hover:text-editorial">Join</Link></li>
           </ul>
         </div>

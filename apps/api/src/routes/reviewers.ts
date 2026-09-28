@@ -37,6 +37,45 @@ app.get("/public", async (c) => {
   return c.json({ reviewers: rows });
 });
 
+// GET /reviewers/:id/public — one reviewer's public profile + all their reviews
+// (which agent, which task's field, score, and rationale). Powers the profile page
+// so a reviewer's whole body of work is visible in one place.
+app.get("/:id/public", async (c) => {
+  const reviewerId = c.req.param("id");
+  const profile = await first<Record<string, unknown>>(
+    c.env,
+    `SELECT u.id, u.display_name, rs.headline, rs.expertise_json, rs.bio, rs.country,
+            rs.gold_accuracy, rs.reviews_count, rs.linkedin_url
+       FROM reviewer_stats rs JOIN users u ON u.id = rs.reviewer_id
+      WHERE rs.reviewer_id = ?1 AND rs.qualified = 1`,
+    reviewerId,
+  );
+  if (!profile) return c.json({ error: "reviewer not found" }, 404);
+  if (typeof profile.expertise_json === "string") (profile as any).expertise = JSON.parse(profile.expertise_json as string);
+
+  const reviews = await all<Record<string, unknown>>(
+    c.env,
+    `SELECT rv.id, rv.overall, rv.reason, rv.created_at, rv.scores_json,
+            t.category AS task_category, t.prompt AS task_prompt,
+            a.id AS agent_id, a.name AS agent_name
+       FROM reviews rv
+       JOIN runs r ON r.id = rv.run_id
+       JOIN agent_versions av ON av.id = r.agent_version_id
+       JOIN agents a ON a.id = av.agent_id
+       LEFT JOIN tasks t ON t.id = rv.task_id
+      WHERE rv.reviewer_id = ?1 AND rv.is_gold_check = 0
+      ORDER BY rv.created_at DESC LIMIT 100`,
+    reviewerId,
+  );
+  for (const r of reviews) {
+    if (typeof r.scores_json === "string") {
+      try { (r as any).scores = JSON.parse(r.scores_json as string); } catch { /* ignore */ }
+    }
+  }
+
+  return c.json({ profile, reviews });
+});
+
 // GET /reviewers/qualify — fetch a gold qualification task.
 app.get("/qualify", requireAuth(["reviewer", "admin"]), async (c) => {
   const gold = await first<{ id: string; prompt: string; rubric_json: string }>(

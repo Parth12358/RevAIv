@@ -83,7 +83,7 @@ app.get("/:id", async (c) => {
   // Reviews with the reviewer's public identity (the face behind the review).
   const reviews = await all<Record<string, unknown>>(
     c.env,
-    `SELECT rv.overall, rv.reason, rv.created_at, rv.scores_json,
+    `SELECT rv.overall, rv.reason, rv.created_at, rv.scores_json, rv.reviewer_id,
             t.category AS task_category, t.prompt AS task_prompt,
             u.display_name AS reviewer_name, rs.headline AS reviewer_headline,
             rs.expertise_json AS reviewer_expertise, rs.gold_accuracy AS reviewer_accuracy,

@@ -11,6 +11,8 @@ import { TourOverlay } from "./components/TourOverlay";
 import Home from "./pages/Home";
 import Directory from "./pages/Directory";
 import AgentDetail from "./pages/AgentDetail";
+import Reviewers from "./pages/Reviewers";
+import ReviewerProfile from "./pages/ReviewerProfile";
 // Internal platform pages
 import Login from "./pages/Login";
 import Join from "./pages/Join";
@@ -56,6 +58,8 @@ export default function App() {
         <Route path="/" element={<News><Home /></News>} />
         <Route path="/directory" element={<News><Directory /></News>} />
         <Route path="/agents/:id" element={<News><AgentDetail /></News>} />
+        <Route path="/reviewers" element={<News><Reviewers /></News>} />
+        <Route path="/reviewers/:id" element={<News><ReviewerProfile /></News>} />
 
         {/* Auth — standalone (no shell) */}
         <Route path="/login" element={<Login />} />
