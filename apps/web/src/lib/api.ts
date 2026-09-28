@@ -111,6 +111,12 @@ export const api = {
   // public
   stats: () => req<Stats>("/stats"),
 
+  // expert sourcing (members) — Fiverr search only
+  sourceFiverr: (q: string) =>
+    req<{ query: string; count: number; people: { handle: string | null; name: string; title: string; url: string; snippet: string; relevance: number | null }[] }>(
+      `/sourcing/fiverr?q=${encodeURIComponent(q)}`,
+    ),
+
   // directory (gated)
   directory: (sort = "trust", category?: string) =>
     req<{ agents: DirectoryAgent[] }>(`/agents?sort=${sort}${category ? `&category=${category}` : ""}`),

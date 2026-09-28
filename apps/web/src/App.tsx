@@ -20,6 +20,7 @@ import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Account from "./pages/Account";
 import Submit from "./pages/Submit";
+import FindExperts from "./pages/FindExperts";
 import Reviewer from "./pages/Reviewer";
 import WriteTask from "./pages/WriteTask";
 import Qualify from "./pages/Qualify";
@@ -72,6 +73,7 @@ export default function App() {
         <Route path="/app" element={<Protected><Dashboard /></Protected>} />
         <Route path="/account" element={<Protected><Account /></Protected>} />
         <Route path="/submit" element={<Protected roles={["member", "admin"]}><Submit /></Protected>} />
+        <Route path="/find-experts" element={<Protected roles={["member", "admin"]}><FindExperts /></Protected>} />
         <Route path="/review" element={<Protected roles={["reviewer", "admin"]}><Reviewer /></Protected>} />
         <Route path="/write-task" element={<Protected roles={["reviewer", "admin"]}><WriteTask /></Protected>} />
         <Route path="/qualify" element={<Protected roles={["reviewer", "admin"]}><Qualify /></Protected>} />

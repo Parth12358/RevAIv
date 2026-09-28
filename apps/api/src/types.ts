@@ -18,6 +18,7 @@ export interface Env {
   ENCRYPTION_KEY?: string;
   BRAINBASE_API_KEY?: string;   // run Brainbase-hosted agents
   OPERATOR_TOKEN?: string;      // Brainbase worker / operator ingestion auth
+  TAVILY_API_KEY?: string;      // web search (Fiverr expert sourcing)
 }
 
 export type Role = "member" | "reviewer" | "admin";

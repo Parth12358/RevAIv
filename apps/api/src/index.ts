@@ -15,6 +15,7 @@ import stats from "./routes/stats";
 import tasks from "./routes/tasks";
 import admin from "./routes/admin";
 import ingest from "./routes/ingest";
+import sourcing from "./routes/sourcing";
 import { runScheduled } from "./cron";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -30,6 +31,7 @@ app.route("/stats", stats);
 app.route("/tasks", tasks);
 app.route("/admin", admin);
 app.route("/ingest", ingest);
+app.route("/sourcing", sourcing);
 app.route("/agents", agents);
 app.route("/runs", runs);
 app.route("/reviews", reviews);

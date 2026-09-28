@@ -20,7 +20,8 @@ export class AuthError extends Error {
 }
 
 // Create an account. Role: ADMIN_EMAIL -> admin; otherwise the requested
-// member|reviewer (defaults to member). Reviewers get an (unqualified) stats row.
+// member|reviewer (defaults to member). Reviewers get a pre-qualified stats row
+// (the qualification exam is skipped — see onboarding).
 export async function signup(
   env: Env,
   email: string,
@@ -57,7 +58,7 @@ export async function signup(
   if (role === "reviewer") {
     await run(
       env,
-      `INSERT OR IGNORE INTO reviewer_stats (reviewer_id, qualified, gold_accuracy) VALUES (?1, 0, 0.5)`,
+      `INSERT OR IGNORE INTO reviewer_stats (reviewer_id, qualified, gold_accuracy) VALUES (?1, 1, 0.5)`,
       uid,
     );
   }

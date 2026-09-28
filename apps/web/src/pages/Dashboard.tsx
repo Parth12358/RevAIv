@@ -54,9 +54,10 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 border-l border-t border-ink">
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 border-l border-t border-ink">
             <ActionCard to="/directory" title="The Directory" desc="Browse vetted agents and their trust scores." />
             <ActionCard to="/submit" title="Submit an Agent" desc="Get a trust score for an agent you're considering." />
+            <ActionCard to="/find-experts" title="Find Experts on Fiverr" desc="Search Fiverr for freelancers in a field to hire or invite as reviewers." />
             <ActionCard to="/account" title="Account & Billing" desc="Manage your membership." />
           </div>
         </div>
