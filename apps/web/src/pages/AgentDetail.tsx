@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api, ApiError } from "../lib/api";
 import { Label, Meter, ScoreBadge, Ornament, LinkButton, Tag } from "../components/ui";
+import { TeX } from "../components/TeX";
 
 // Adapter-specific setup guidance shown on the dossier.
 const ADAPTER_SETUP: Record<string, { how: string; steps: string[] }> = {
@@ -76,7 +77,7 @@ export default function AgentDetail() {
   if (err) return <p className="py-16 font-mono text-sm text-editorial">{err}</p>;
   if (!data) return <p className="py-16 text-center font-mono text-sm text-neutral-500">Loading…</p>;
 
-  const { agent, versions, scores, baselines, reviews } = data as any;
+  const { agent, versions, scores, baselines, reviews, score_explain } = data as any;
   const latest = scores[0];
   const baseline = baselines[0]?.human_baseline_json
     ? (JSON.parse(baselines[0].human_baseline_json) as { cost_usd: number; duration_ms: number })
@@ -134,6 +135,98 @@ export default function AgentDetail() {
           )}
         </div>
       </section>
+
+      {/* Methodology — the score, fully traceable to its inputs (PRD §202) */}
+      {latest && (() => {
+        const q = latest.quality as number, cScore = latest.cost as number, s = latest.speed as number;
+        const ex = score_explain ?? {};
+        const usd = (n: number) => `\\$${n < 0.01 ? n.toFixed(5) : n.toFixed(4)}`;
+        const secs = (ms: number) => `${(ms / 1000).toFixed(1)}\\,\\text{s}`;
+        const contributions = (reviews ?? []).map((r: any) => ({
+          name: r.reviewer_name ?? "Anon",
+          overall: r.overall as number,
+          weight: Math.max(typeof r.reviewer_accuracy === "number" ? r.reviewer_accuracy : 0.5, 0.1),
+        }));
+        const hasCost = (ex.agentCost ?? 0) > 0 && (ex.medCost ?? 0) > 0;
+        const hasSpeed = (ex.agentDur ?? 0) > 0 && (ex.medDur ?? 0) > 0;
+        const conf = (latest.confidence as string) ?? "low";
+        return (
+          <section className="py-8 border-b border-ink">
+            <div className="flex items-center gap-3">
+              <Label>Methodology · How this score is computed</Label>
+              <Tag tone="outline">auditable</Tag>
+            </div>
+
+            <div className="mt-5 border border-ink bg-paper p-5 overflow-x-auto">
+              <TeX block>
+                {`\\text{Trust} = 10\\,(0.6\\,Q + 0.2\\,C + 0.2\\,S) = 10\\,(0.6\\cdot ${q.toFixed(1)} + 0.2\\cdot ${cScore.toFixed(1)} + 0.2\\cdot ${s.toFixed(1)}) = ${Math.round(latest.trust)}`}
+              </TeX>
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-0 border-l border-t border-ink">
+              {/* Quality */}
+              <div className="border-r border-b border-ink p-5">
+                <div className="font-mono text-[0.6rem] uppercase tracking-widest text-editorial">Quality · 60%</div>
+                <p className="mt-2 font-body text-sm text-neutral-700 leading-snug">
+                  Mean rubric score, each review weighted by that reviewer's accuracy on hidden gold checks.
+                </p>
+                <div className="mt-3"><TeX block>{`Q = \\frac{\\sum_i w_i\\,o_i}{\\sum_i w_i} = ${q.toFixed(1)}`}</TeX></div>
+                {contributions.length > 0 && (
+                  <table className="mt-3 w-full font-mono text-[0.6rem]">
+                    <thead><tr className="text-neutral-500 uppercase tracking-widest"><th className="text-left font-normal">Reviewer</th><th className="text-right font-normal">score o</th><th className="text-right font-normal">weight w</th></tr></thead>
+                    <tbody>
+                      {contributions.slice(0, 6).map((cn: any, i: number) => (
+                        <tr key={i} className="border-t border-divider"><td className="py-1 truncate pr-2">{cn.name}</td><td className="py-1 text-right">{cn.overall?.toFixed?.(1)}</td><td className="py-1 text-right">{cn.weight.toFixed(2)}</td></tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+
+              {/* Cost */}
+              <div className="border-r border-b border-ink p-5">
+                <div className="font-mono text-[0.6rem] uppercase tracking-widest text-editorial">Cost · 20%</div>
+                <p className="mt-2 font-body text-sm text-neutral-700 leading-snug">
+                  Rewards agents cheaper than the field median cost per task.
+                </p>
+                <div className="mt-3">
+                  {hasCost ? (
+                    <TeX block>{`C = 10\\,\\min\\!\\left(1, \\frac{${usd(ex.medCost)}}{${usd(ex.agentCost)}}\\right) = ${cScore.toFixed(1)}`}</TeX>
+                  ) : (
+                    <TeX block>{`C = ${cScore.toFixed(1)}`}</TeX>
+                  )}
+                </div>
+                <p className="mt-2 font-mono text-[0.6rem] text-neutral-500">
+                  {hasCost ? `field median ${'$'}${ex.medCost.toFixed(4)}/task · this agent ${'$'}${ex.agentCost.toFixed(4)}/task` : "no metered cost on this agent's runs — scored full marks"}
+                </p>
+              </div>
+
+              {/* Speed */}
+              <div className="border-r border-b border-ink p-5">
+                <div className="font-mono text-[0.6rem] uppercase tracking-widest text-editorial">Speed · 20%</div>
+                <p className="mt-2 font-body text-sm text-neutral-700 leading-snug">
+                  Rewards agents faster than the field median time per task.
+                </p>
+                <div className="mt-3">
+                  {hasSpeed ? (
+                    <TeX block>{`S = 10\\,\\min\\!\\left(1, \\frac{${secs(ex.medDur)}}{${secs(ex.agentDur)}}\\right) = ${s.toFixed(1)}`}</TeX>
+                  ) : (
+                    <TeX block>{`S = ${s.toFixed(1)}`}</TeX>
+                  )}
+                </div>
+                <p className="mt-2 font-mono text-[0.6rem] text-neutral-500">
+                  {hasSpeed ? `field median ${(ex.medDur / 1000).toFixed(1)}s/task · this agent ${(ex.agentDur / 1000).toFixed(1)}s/task` : "no timing on this agent's runs — scored full marks"}
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-4 font-mono text-[0.65rem] text-neutral-500 leading-relaxed">
+              Confidence <span className="text-ink uppercase">{conf}</span> · {latest.reviewed_tasks} reviewed {latest.reviewed_tasks === 1 ? "task" : "tasks"}.
+              Tiers: Low under 5, Medium 5–9, High 10+. Scores below Medium are shown but flagged as early signal.
+            </p>
+          </section>
+        );
+      })()}
 
       {/* How to run / set up this agent */}
       {(() => {

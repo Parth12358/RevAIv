@@ -7,7 +7,7 @@ import { requireAuth, requireMembership } from "../lib/auth";
 import { encryptSecret } from "../lib/crypto";
 import { createVettingCheckout } from "../lib/stripe";
 import { enqueueRunsForVersion, executeAll } from "../lib/runner";
-import { recomputeScore } from "../lib/score";
+import { recomputeScore, scoreInputs } from "../lib/score";
 import type { AdapterType } from "../types";
 
 type Vars = { Variables: { session: Session }; Bindings: Env };
@@ -108,7 +108,16 @@ app.get("/:id", async (c) => {
     }
   }
 
-  return c.json({ agent, versions, scores, baselines, reviews });
+  // Score provenance: the raw cost/speed inputs behind the latest score, so the
+  // methodology panel can show a fully traceable computation (PRD §202).
+  let score_explain: Record<string, number> | null = null;
+  const latestVersionId = (versions[0]?.id as string | undefined) ?? undefined;
+  if (latestVersionId) {
+    const inputs = await scoreInputs(c.env, latestVersionId, (agent.category as string) ?? "lead_research");
+    score_explain = inputs;
+  }
+
+  return c.json({ agent, versions, scores, baselines, reviews, score_explain });
 });
 
 // POST /agents — submit an agent; returns Stripe Checkout URL for the vetting fee.

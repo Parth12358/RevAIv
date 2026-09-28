@@ -97,6 +97,37 @@ async function computeCostSpeed(
   return { c, s };
 }
 
+// Inputs behind the cost/speed sub-scores, surfaced for the audit/methodology
+// panel so a score is traceable to the numbers that produced it (PRD §202).
+export async function scoreInputs(
+  env: Env,
+  agentVersionId: string,
+  category: string,
+): Promise<{ medCost: number; medDur: number; agentCost: number; agentDur: number }> {
+  const agentAgg = await first<{ cost: number | null; dur: number | null }>(
+    env,
+    `SELECT AVG(cost_usd) AS cost, AVG(duration_ms) AS dur
+       FROM runs WHERE agent_version_id = ?1 AND status = 'done'`,
+    agentVersionId,
+  );
+  const perVersion = await all<{ cost: number; dur: number }>(
+    env,
+    `SELECT AVG(r.cost_usd) AS cost, AVG(r.duration_ms) AS dur
+       FROM runs r
+       JOIN agent_versions av ON av.id = r.agent_version_id
+       JOIN agents a ON a.id = av.agent_id
+      WHERE a.category = ?1 AND r.status = 'done'
+      GROUP BY r.agent_version_id`,
+    category,
+  );
+  return {
+    medCost: median(perVersion.map((v) => v.cost).filter((n) => n > 0)),
+    medDur: median(perVersion.map((v) => v.dur).filter((n) => n > 0)),
+    agentCost: agentAgg?.cost ?? 0,
+    agentDur: agentAgg?.dur ?? 0,
+  };
+}
+
 export async function recomputeScore(env: Env, agentVersionId: string): Promise<ComputedScore> {
   // Resolve category via the agent.
   const meta = await first<{ category: string }>(
