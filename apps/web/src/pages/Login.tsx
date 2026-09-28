@@ -41,7 +41,7 @@ export default function Login() {
   return (
     <div className="newsprint min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-md border-4 border-ink bg-paper p-8">
-        <Link to="/" className="label text-[0.6rem] hover:text-editorial">← The Agent Trust Ledger</Link>
+        <Link to="/" className="label text-[0.6rem] hover:text-editorial">← RevAI</Link>
         <h1 className="mt-4 font-serif font-black tracking-tighter text-4xl leading-[0.95]">Sign in.</h1>
         <p className="mt-2 font-body text-neutral-600">Access the working desk.</p>
         {roleChoices ? (

@@ -20,17 +20,17 @@ function Masthead() {
   return (
     <header className="sticky top-0 z-40 bg-paper border-b-4 border-ink">
       <div className="border-b border-ink">
-        <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between h-8 font-mono text-[0.65rem] uppercase tracking-widest text-neutral-600">
-          <span>Vol. 1 · {EDITION_DATE}</span>
-          <span className="hidden sm:block">The Trust Record for AI Agents · Price: One Membership</span>
-          <span>Est. 2026</span>
+        <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between gap-3 h-8 font-mono text-[0.65rem] uppercase tracking-widest text-neutral-600">
+          <span className="truncate">Vol. 1 · {EDITION_DATE}</span>
+          <span className="hidden md:block truncate">The Trust Record for AI Agents · Independently Reviewed</span>
+          <span className="hidden sm:block shrink-0">Est. 2026</span>
         </div>
       </div>
-      <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        <Link to="/" className="font-serif font-black tracking-tighter leading-none text-3xl sm:text-4xl">
-          The Agent Trust Ledger
+      <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+        <Link to="/" className="font-serif font-black tracking-tighter leading-none text-2xl sm:text-4xl">
+          RevAI
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
           {session ? (
             <Link to="/app" className="label text-[0.65rem] hover:text-editorial">
               Enter Platform →
@@ -68,7 +68,7 @@ function Footer() {
     <footer className="mt-16 border-t-4 border-ink bg-ink text-paper">
       <div className="max-w-screen-xl mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
         <div className="col-span-2">
-          <div className="font-serif font-black text-2xl tracking-tighter">The Agent Trust Ledger</div>
+          <div className="font-serif font-black text-2xl tracking-tighter">RevAI</div>
           <p className="mt-3 font-body text-neutral-400 text-sm max-w-sm leading-relaxed">
             A membership directory of AI agents, scored on real tasks judged by vetted human
             reviewers and re-tested on every version. Scores are opinions, not guarantees.

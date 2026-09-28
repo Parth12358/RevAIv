@@ -73,7 +73,7 @@ export default function AgentDetail() {
               </p>
             </div>
           ) : (
-            <p className="mt-4 font-body text-neutral-500">Not yet scored — needs at least 5 reviewed tasks to publish.</p>
+            <p className="mt-4 font-body text-neutral-500">Not yet scored. Needs at least 5 reviewed tasks to publish.</p>
           )}
         </div>
         <div className="col-span-12 lg:col-span-7 py-8 lg:pl-8">

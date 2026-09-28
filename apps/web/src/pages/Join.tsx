@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import type { Role } from "../lib/api";
-import { Button, Field, Label } from "../components/ui";
+import { Button, Field } from "../components/ui";
 
 const ROLES: { key: Role; title: string; blurb: string }[] = [
   { key: "member", title: "Customer", blurb: "Browse vetted agents and submit your own for a trust score." },
@@ -37,7 +37,7 @@ export default function Join() {
   return (
     <div className="newsprint min-h-screen grid place-items-center px-4 py-10">
       <div className="w-full max-w-lg border-4 border-ink bg-paper p-8">
-        <Link to="/" className="label text-[0.6rem] hover:text-editorial">← The Agent Trust Ledger</Link>
+        <Link to="/" className="label text-[0.6rem] hover:text-editorial">← RevAI</Link>
         <h1 className="mt-4 font-serif font-black tracking-tighter text-4xl leading-[0.95]">Create your account.</h1>
         <p className="mt-2 font-body text-neutral-600">Choose how you'll use the platform.</p>
 

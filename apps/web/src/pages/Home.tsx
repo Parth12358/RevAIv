@@ -20,14 +20,15 @@ export default function Home() {
         <div className="grid grid-cols-12 gap-0">
           <div className="col-span-12 lg:col-span-8 lg:border-r border-ink lg:pr-10">
             <Label className="text-editorial">Vol. 1 · The Trust Problem</Label>
-            <h1 className="mt-4 font-serif font-black tracking-tighter leading-[0.9] text-5xl sm:text-6xl lg:text-8xl">
-              A Costco membership for AI agents.
+            <h1 className="mt-4 font-serif font-black tracking-tighter leading-[0.95] sm:leading-[0.9] text-4xl sm:text-6xl lg:text-8xl">
+              A trust score for every AI agent.
             </h1>
-            <p className="drop-cap mt-6 font-body text-lg leading-relaxed text-neutral-700 max-w-2xl text-justify">
-              Businesses cannot tell which agents actually deliver. We publish a single trust
-              score — quality, cost and speed — for a specific kind of task, grounded in the
-              judgment of vetted human reviewers and re-tested on every agent update. Members
-              browse agents we have already vetted, and can submit any agent for a score.
+            <p className="drop-cap mt-6 font-body text-base sm:text-lg leading-relaxed text-neutral-700 max-w-2xl">
+              Businesses cannot easily tell which agents actually deliver. We publish a single
+              trust score for quality, cost, and speed on a specific kind of task. Every score is
+              grounded in the judgment of vetted human reviewers and re-tested whenever an agent
+              updates. Members browse agents we have already vetted, and can submit any agent for
+              scoring.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <LinkButton to={cta}>{session ? "Enter the platform" : "Become a member"}</LinkButton>
@@ -63,16 +64,16 @@ export default function Home() {
             40% of agentic projects will be cancelled.
           </h2>
         </div>
-        <div className="col-span-12 lg:col-span-8 lg:pl-8 mt-6 lg:mt-0 font-body text-lg leading-relaxed text-neutral-700 columns-1 md:columns-2 gap-8 text-justify">
+        <div className="col-span-12 lg:col-span-8 lg:pl-8 mt-6 lg:mt-0 font-body text-lg leading-relaxed text-neutral-700 columns-1 md:columns-2 gap-8">
           <p>
             Gartner expects over 40% of agentic AI projects to be cancelled by end of 2027, and
             estimates only about 130 of thousands of agentic vendors are real. Existing
-            certification audits enterprise platforms for security — not whether the agent is any
+            certification audits enterprise platforms for security, not whether the agent is any
             good at the task you are paying it to do.
           </p>
           <p className="mt-4">
             We take the opposite approach: real tasks, human judgment, and a score that moves when
-            the agent changes. No self-reported benchmarks, no vanity leaderboards — just a number
+            the agent changes. No self-reported benchmarks and no vanity leaderboards, just a number
             you can put next to a purchase order.
           </p>
         </div>
@@ -87,10 +88,10 @@ export default function Home() {
               ["01", "Submit", "A member submits an agent and pays a per-agent vetting fee."],
               ["02", "Run", "We run it against a curated task library and record cost, time and version."],
               ["03", "Review", "Vetted reviewers score each blind output against a rubric."],
-              ["04", "Score", "A 0–100 trust score is published — and re-tested on every update."],
+              ["04", "Score", "A 0 to 100 trust score is published, then re-tested on every update."],
             ].map(([n, t, d]) => (
               <div key={n} className="border-r border-b border-neutral-700 p-6">
-                <div className="font-mono text-editorial text-2xl">{n}</div>
+                <div className="font-mono text-editorial-on-dark text-2xl">{n}</div>
                 <div className="mt-2 font-serif font-bold text-2xl">{t}</div>
                 <p className="mt-2 font-body text-neutral-400 text-sm leading-relaxed">{d}</p>
               </div>

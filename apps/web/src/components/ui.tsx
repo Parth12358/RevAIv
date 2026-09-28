@@ -17,7 +17,7 @@ export function Button({
   variant?: "primary" | "secondary" | "ghost";
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const base =
-    "font-sans uppercase tracking-widest text-xs font-semibold px-6 min-h-[44px] inline-flex items-center justify-center transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed";
+    "font-sans uppercase tracking-widest text-xs font-semibold px-6 min-h-[44px] inline-flex items-center justify-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-editorial focus-visible:ring-offset-2 focus-visible:ring-offset-paper disabled:opacity-40 disabled:cursor-not-allowed";
   const styles = {
     primary: "bg-ink text-paper border border-transparent hover:bg-paper hover:text-ink hover:border-ink",
     secondary: "border border-ink bg-transparent text-ink hover:bg-ink hover:text-paper",
@@ -40,7 +40,7 @@ export function LinkButton({
   variant?: "primary" | "secondary";
 }) {
   const base =
-    "font-sans uppercase tracking-widest text-xs font-semibold px-6 min-h-[44px] inline-flex items-center justify-center transition-all duration-200";
+    "font-sans uppercase tracking-widest text-xs font-semibold px-6 min-h-[44px] inline-flex items-center justify-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-editorial focus-visible:ring-offset-2 focus-visible:ring-offset-paper";
   const styles = {
     primary: "bg-ink text-paper border border-transparent hover:bg-paper hover:text-ink hover:border-ink",
     secondary: "border border-ink bg-transparent text-ink hover:bg-ink hover:text-paper",

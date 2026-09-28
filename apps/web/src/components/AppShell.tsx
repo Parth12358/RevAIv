@@ -58,7 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <Link to="/app" className="font-serif font-black tracking-tighter leading-none text-2xl sm:text-3xl">
-            The Agent Trust Ledger
+            RevAI
           </Link>
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline label text-[0.6rem] text-neutral-500">{session?.role} · {session?.email}</span>

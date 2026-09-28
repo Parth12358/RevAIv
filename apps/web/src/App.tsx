@@ -5,11 +5,11 @@ import type { Role } from "./lib/api";
 import { NewsprintLayout } from "./components/NewsprintLayout";
 import { AppShell } from "./components/AppShell";
 
-// Newsprint (front-of-house)
+// Front-of-house pages
 import Home from "./pages/Home";
 import Directory from "./pages/Directory";
 import AgentDetail from "./pages/AgentDetail";
-// Material You (internal platform)
+// Internal platform pages
 import Login from "./pages/Login";
 import Join from "./pages/Join";
 import Onboarding from "./pages/Onboarding";
@@ -25,8 +25,8 @@ function News({ children }: { children: ReactNode }) {
   return <NewsprintLayout>{children}</NewsprintLayout>;
 }
 
-// Guard for internal (MD3) routes. Redirects unauthenticated users to /login and
-// un-onboarded non-admins to /onboarding.
+// Guard for internal platform routes. Redirects unauthenticated users to /login
+// and un-onboarded non-admins to /onboarding.
 function Protected({
   children,
   roles,
@@ -38,7 +38,7 @@ function Protected({
 }) {
   const { session, onboarded, loading } = useAuth();
   const loc = useLocation();
-  if (loading) return <div className="md min-h-screen grid place-items-center font-roboto text-md-on-variant">Loading…</div>;
+  if (loading) return <div className="newsprint min-h-screen grid place-items-center font-mono text-sm text-neutral-500">Loading…</div>;
   if (!session) return <Navigate to="/login" state={{ from: loc.pathname }} replace />;
   if (roles && !roles.includes(session.role)) return <Navigate to="/app" replace />;
   if (!skipOnboardGate && !onboarded && session.role !== "admin") return <Navigate to="/onboarding" replace />;
@@ -54,14 +54,14 @@ export default function App() {
         <Route path="/directory" element={<News><Directory /></News>} />
         <Route path="/agents/:id" element={<News><AgentDetail /></News>} />
 
-        {/* Auth — Material You (standalone) */}
+        {/* Auth — standalone (no shell) */}
         <Route path="/login" element={<Login />} />
         <Route path="/join" element={<Join />} />
 
         {/* Onboarding — inside the shell but skips its own gate */}
         <Route path="/onboarding" element={<Protected skipOnboardGate><Onboarding /></Protected>} />
 
-        {/* Internal platform — Material You */}
+        {/* Internal platform */}
         <Route path="/app" element={<Protected><Dashboard /></Protected>} />
         <Route path="/account" element={<Protected><Account /></Protected>} />
         <Route path="/submit" element={<Protected roles={["member", "admin"]}><Submit /></Protected>} />
