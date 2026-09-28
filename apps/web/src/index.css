@@ -148,3 +148,6 @@
 .md-prose th, .md-prose td { border: 1px solid #111; padding: 0.4em 0.6em; text-align: left; vertical-align: top; }
 .md-prose th { background: #111; color: #F9F9F7; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8em; }
 .md-prose img { max-width: 100%; }
+/* KaTeX: keep wide display equations scrollable instead of breaking the layout. */
+.md-prose .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.2em 0; margin: 0.8em 0; }
+.md-prose .katex { font-size: 1.05em; }
