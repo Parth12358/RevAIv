@@ -14,6 +14,7 @@ const NAV: Record<string, { to: string; label: string; external?: boolean }[]> =
     { to: "/app", label: "Dashboard" },
     { to: "/review", label: "Review Desk" },
     { to: "/write-task", label: "Write a Task" },
+    { to: "/directory", label: "The Directory" },
     { to: "/account", label: "Account" },
   ],
   admin: [
