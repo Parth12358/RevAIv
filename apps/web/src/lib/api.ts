@@ -117,10 +117,12 @@ export const api = {
   agent: (id: string) =>
     req<{ agent: any; versions: any[]; scores: any[]; baselines: any[] }>(`/agents/${id}`),
   submitAgent: (body: Record<string, unknown>) =>
-    req<{ agent_id: string; agent_version_id: string; checkout_url: string | null }>("/agents", {
+    req<{ agent_id: string; agent_version_id: string; checkout_url: string | null; auto_running: number }>("/agents", {
       method: "POST",
       body: JSON.stringify(body),
     }),
+  runs: (agentVersionId: string) =>
+    req<{ runs: any[] }>(`/runs?agent_version_id=${agentVersionId}`),
 
   // reviewer
   reviewsNext: (exclude?: string[]) =>

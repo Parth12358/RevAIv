@@ -4,6 +4,7 @@ import { runHttp } from "./http";
 import { runClaudeWrapper } from "./claude";
 import { runMcp } from "./mcp";
 import { runBrainbase } from "./brainbase";
+import { runOpenAiChat } from "./openai_chat";
 
 export interface AgentSpec {
   adapter_type: AdapterType;
@@ -20,6 +21,8 @@ export async function runAdapter(
   switch (agent.adapter_type) {
     case "http":
       return runHttp(agent, task);
+    case "openai_chat":
+      return runOpenAiChat(agent, task);
     case "claude_wrapper":
       return runClaudeWrapper(env, agent, task);
     case "brainbase":

@@ -6,6 +6,9 @@ import { all, first, id, nowIso, run } from "../lib/db";
 import { requireAuth, requireMembership } from "../lib/auth";
 import { encryptSecret } from "../lib/crypto";
 import { createVettingCheckout } from "../lib/stripe";
+import { enqueueRunsForVersion, executeAll } from "../lib/runner";
+import { recomputeScore } from "../lib/score";
+import type { AdapterType } from "../types";
 
 type Vars = { Variables: { session: Session }; Bindings: Env };
 const app = new Hono<Vars>();
@@ -115,7 +118,7 @@ app.post("/", requireAuth(["member", "admin"]), async (c) => {
     name: string;
     owner_url?: string;
     category?: string;
-    adapter_type: "http" | "mcp" | "claude_wrapper";
+    adapter_type: AdapterType;
     endpoint?: string;
     api_key?: string;
     declared_cost_usd?: number;
@@ -185,7 +188,32 @@ app.post("/", requireAuth(["member", "admin"]), async (c) => {
     checkoutUrl = null;
   }
 
-  return c.json({ agent_id: agentId, agent_version_id: versionId, checkout_url: checkoutUrl });
+  // End-to-end runs: when Stripe isn't gating the submission (demo mode) or an
+  // admin submitted it, run the agent against its field's tasks right now so the
+  // outputs land in the review queue automatically. When Stripe IS gating, the
+  // vetting webhook enqueues the runs after payment instead.
+  let autoRunning = 0;
+  if (!checkoutUrl || session.role === "admin") {
+    try {
+      const messages = await enqueueRunsForVersion(c.env, versionId);
+      autoRunning = messages.length;
+      c.executionCtx.waitUntil(
+        executeAll(c.env, messages)
+          .then(() => recomputeScore(c.env, versionId))
+          .then(() => {})
+          .catch(() => {}),
+      );
+    } catch {
+      autoRunning = 0;
+    }
+  }
+
+  return c.json({
+    agent_id: agentId,
+    agent_version_id: versionId,
+    checkout_url: checkoutUrl,
+    auto_running: autoRunning,
+  });
 });
 
 async function hashConfig(body: Record<string, unknown>): Promise<string> {

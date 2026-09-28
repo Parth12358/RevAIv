@@ -21,7 +21,7 @@ export interface Env {
 }
 
 export type Role = "member" | "reviewer" | "admin";
-export type AdapterType = "http" | "mcp" | "claude_wrapper" | "brainbase";
+export type AdapterType = "http" | "mcp" | "claude_wrapper" | "brainbase" | "openai_chat";
 export type RunStatus = "queued" | "running" | "done" | "failed";
 export type Confidence = "low" | "medium" | "high";
 
