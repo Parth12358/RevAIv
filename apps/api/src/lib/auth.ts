@@ -2,7 +2,7 @@
 // role-based + membership-gated middleware.
 import type { Context } from "hono";
 import type { Env, Role } from "../types";
-import { first, id, nowIso, run } from "./db";
+import { all, first, id, nowIso, run } from "./db";
 import { hashPassword, verifyPassword } from "./password";
 
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -31,11 +31,17 @@ export async function signup(
   if (!normalized || !password || password.length < 8) {
     throw new AuthError("A valid email and a password of at least 8 characters are required");
   }
-  const existing = await first<{ id: string }>(env, `SELECT id FROM users WHERE email = ?1`, normalized);
-  if (existing) throw new AuthError("An account with that email already exists", 409);
-
   let role: Role = requestedRole === "reviewer" ? "reviewer" : "member";
   if (env.ADMIN_EMAIL && normalized === env.ADMIN_EMAIL.trim().toLowerCase()) role = "admin";
+
+  // Same email may hold separate customer + reviewer accounts, but only one per role.
+  const existing = await first<{ id: string }>(
+    env,
+    `SELECT id FROM users WHERE email = ?1 AND role = ?2`,
+    normalized,
+    role,
+  );
+  if (existing) throw new AuthError(`You already have a ${role} account with that email`, 409);
 
   const uid = id("usr");
   const passwordHash = await hashPassword(password);
@@ -62,25 +68,47 @@ export async function authenticate(
   env: Env,
   email: string,
   password: string,
+  role?: Role,
 ): Promise<{ token: string; session: Session }> {
   const normalized = email.trim().toLowerCase();
-  const user = await first<{ id: string; email: string; role: Role; password_hash: string | null }>(
+  const users = await all<{ id: string; email: string; role: Role; password_hash: string | null }>(
     env,
     `SELECT id, email, role, password_hash FROM users WHERE email = ?1`,
     normalized,
   );
-  if (!user || !(await verifyPassword(password, user.password_hash))) {
-    throw new AuthError("Invalid email or password", 401);
+
+  // Accounts whose password matches (usually one, since roles have their own).
+  const matches: { id: string; email: string; role: Role }[] = [];
+  for (const u of users) {
+    if (await verifyPassword(password, u.password_hash)) matches.push({ id: u.id, email: u.email, role: u.role });
   }
-  return mintSession(env, { userId: user.id, email: user.email, role: user.role });
+  if (matches.length === 0) throw new AuthError("Invalid email or password", 401);
+
+  let chosen = matches[0];
+  if (matches.length > 1) {
+    const byRole = role ? matches.find((m) => m.role === role) : undefined;
+    if (!byRole) {
+      const err = new AuthError("choose_role", 409);
+      (err as AuthError & { roles?: Role[] }).roles = matches.map((m) => m.role);
+      throw err;
+    }
+    chosen = byRole;
+  }
+  return mintSession(env, { userId: chosen.id, email: chosen.email, role: chosen.role });
 }
 
 async function mintSession(env: Env, session: Session): Promise<{ token: string; session: Session }> {
+  const token = await issueSession(env, session);
+  return { token, session };
+}
+
+// Issue a session token for an arbitrary user (used by admin impersonation).
+export async function issueSession(env: Env, session: Session): Promise<string> {
   const token = id("sess");
   await env.SESSIONS.put(`session:${token}`, JSON.stringify(session), {
     expirationTtl: SESSION_TTL_SECONDS,
   });
-  return { token, session };
+  return token;
 }
 
 export async function getSession(env: Env, token: string | undefined): Promise<Session | null> {

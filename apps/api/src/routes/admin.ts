@@ -2,8 +2,9 @@
 import { Hono } from "hono";
 import type { Env } from "../types";
 import type { Session } from "../lib/auth";
-import { requireAuth } from "../lib/auth";
-import { all, first, run } from "../lib/db";
+import { requireAuth, issueSession } from "../lib/auth";
+import { all, first, id, nowIso, run } from "../lib/db";
+import { hashPassword } from "../lib/password";
 
 type Vars = { Variables: { session: Session }; Bindings: Env };
 const app = new Hono<Vars>();
@@ -73,6 +74,56 @@ app.get("/reviews", async (c) =>
     ),
   }),
 );
+
+// POST /admin/impersonate { role } — mint a session for a ready-to-use demo
+// customer or reviewer so the admin can view the platform as that user.
+app.post("/impersonate", async (c) => {
+  const { role } = await c.req.json<{ role: "member" | "reviewer" }>();
+  const r = role === "reviewer" ? "reviewer" : "member";
+  const email = r === "reviewer" ? "demo.reviewer@agenttrust.dev" : "demo.customer@agenttrust.dev";
+  const name = r === "reviewer" ? "Demo Reviewer" : "Demo Customer";
+
+  let user = await first<{ id: string }>(c.env, `SELECT id FROM users WHERE email = ?1`, email);
+  let userId = user?.id;
+  if (!userId) {
+    userId = id("usr");
+    const pw = await hashPassword(crypto.randomUUID());
+    await run(
+      c.env,
+      `INSERT INTO users (id, email, role, password_hash, display_name, onboarded, membership_active, created_at)
+       VALUES (?1,?2,?3,?4,?5,1,?6,?7)`,
+      userId,
+      email,
+      r,
+      pw,
+      name,
+      r === "member" ? 1 : 0,
+      nowIso(),
+    );
+  } else {
+    await run(
+      c.env,
+      `UPDATE users SET role=?2, onboarded=1, display_name=?3, membership_active=?4 WHERE id=?1`,
+      userId,
+      r,
+      name,
+      r === "member" ? 1 : 0,
+    );
+  }
+  if (r === "reviewer") {
+    await run(
+      c.env,
+      `INSERT INTO reviewer_stats (reviewer_id, qualified, gold_accuracy, headline, expertise_json, bio, country)
+       VALUES (?1, 1, 0.9, 'Demo reviewer profile', ?2, 'A demonstration reviewer account.', 'United States')
+       ON CONFLICT(reviewer_id) DO UPDATE SET qualified=1`,
+      userId,
+      JSON.stringify(["lead_research", "operations", "general_research"]),
+    );
+  }
+
+  const token = await issueSession(c.env, { userId, email, role: r });
+  return c.json({ token, session: { userId, email, role: r } });
+});
 
 // Controls
 app.post("/tasks/:id/status", async (c) => {

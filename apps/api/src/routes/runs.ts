@@ -3,8 +3,8 @@ import { Hono } from "hono";
 import type { Env } from "../types";
 import type { Session } from "../lib/auth";
 import { requireAuth } from "../lib/auth";
-import { all, first, id, nowIso, run } from "../lib/db";
-import { enqueueRunsForVersion, executeAll } from "../lib/runner";
+import { all } from "../lib/db";
+import { enqueueRunsForVersion, executeAll, recordManualRun } from "../lib/runner";
 import { isCategory } from "../lib/categories";
 
 type Vars = { Variables: { session: Session }; Bindings: Env };
@@ -38,56 +38,8 @@ app.post("/manual", requireAuth(["admin"]), async (c) => {
     return c.json({ error: "agent_name, task_id and output are required" }, 400);
   }
   const category = isCategory(body.category) ? body.category : "lead_research";
-
-  let agent = await first<{ id: string }>(c.env, `SELECT id FROM agents WHERE name = ?1`, body.agent_name);
-  let agentId = agent?.id;
-  if (!agentId) {
-    agentId = id("agt");
-    await run(
-      c.env,
-      `INSERT INTO agents (id, name, owner_url, category, adapter_type, submitted_by, created_at)
-       VALUES (?1,?2,?3,?4,'http',?5,?6)`,
-      agentId,
-      body.agent_name,
-      body.owner_url ?? null,
-      category,
-      session.userId,
-      nowIso(),
-    );
-  }
-  let version = await first<{ id: string }>(
-    c.env,
-    `SELECT id FROM agent_versions WHERE agent_id = ?1 ORDER BY detected_at DESC LIMIT 1`,
-    agentId,
-  );
-  let versionId = version?.id;
-  if (!versionId) {
-    versionId = id("ver");
-    await run(
-      c.env,
-      `INSERT INTO agent_versions (id, agent_id, version_label, config_hash, detected_at) VALUES (?1,?2,'manual','manual',?3)`,
-      versionId,
-      agentId,
-      nowIso(),
-    );
-  }
-
-  const runId = id("run");
-  await run(
-    c.env,
-    `INSERT INTO runs (id, agent_version_id, task_id, status, output_full, output_preview, cost_usd, duration_ms, is_manual, started_at, finished_at, created_at)
-     VALUES (?1,?2,?3,'done',?4,?5,?6,?7,1,?8,?8,?8)`,
-    runId,
-    versionId,
-    body.task_id,
-    body.output,
-    body.output.slice(0, 500),
-    body.cost_usd ?? null,
-    body.duration_ms ?? null,
-    nowIso(),
-  );
-
-  return c.json({ run_id: runId, agent_id: agentId, agent_version_id: versionId });
+  const result = await recordManualRun(c.env, { ...body, category, submitted_by: session.userId });
+  return c.json(result);
 });
 
 // GET /runs?agent_version_id= — inspect run status (admin/demo).

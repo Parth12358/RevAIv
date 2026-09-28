@@ -32,12 +32,22 @@ const EDITION_DATE = new Date().toLocaleDateString("en-US", {
 });
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { session, logout } = useAuth();
+  const { session, logout, impersonating, stopImpersonating } = useAuth();
   const nav = useNavigate();
   const links = NAV[session?.role ?? "member"] ?? NAV.member;
 
   return (
     <div className="newsprint min-h-screen flex flex-col">
+      {impersonating && (
+        <div className="bg-editorial text-paper">
+          <div className="max-w-screen-xl mx-auto px-4 h-9 flex items-center justify-between font-mono text-[0.65rem] uppercase tracking-widest">
+            <span>Admin preview — viewing as demo {session?.role}</span>
+            <button onClick={async () => { await stopImpersonating(); nav("/admin"); }} className="underline hover:no-underline">
+              Return to admin →
+            </button>
+          </div>
+        </div>
+      )}
       <header className="sticky top-0 z-40 bg-paper border-b-4 border-ink">
         <div className="border-b border-ink">
           <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between h-8 font-mono text-[0.65rem] uppercase tracking-widest text-neutral-600">

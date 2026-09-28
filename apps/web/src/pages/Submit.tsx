@@ -50,9 +50,15 @@ export default function Submit() {
           <Select label="Adapter" value={form.adapter_type} onChange={(e) => set("adapter_type", e.target.value)}>
             <option value="http">HTTP</option>
             <option value="claude_wrapper">Claude wrapper</option>
+            <option value="brainbase">Brainbase agent</option>
             <option value="mcp">MCP</option>
           </Select>
-          <Field label={form.adapter_type === "claude_wrapper" ? "Model ID" : "Endpoint URL"} value={form.endpoint} onChange={(e) => set("endpoint", e.target.value)} placeholder={form.adapter_type === "claude_wrapper" ? "claude-opus-4-8" : "https://api.vendor.example/run"} />
+          <Field
+            label={form.adapter_type === "claude_wrapper" ? "Model ID" : form.adapter_type === "brainbase" ? "Harness:model" : "Endpoint URL"}
+            value={form.endpoint}
+            onChange={(e) => set("endpoint", e.target.value)}
+            placeholder={form.adapter_type === "claude_wrapper" ? "claude-opus-4-8" : form.adapter_type === "brainbase" ? "claude_code:claude-sonnet-5" : "https://api.vendor.example/run"}
+          />
           <Field label="Declared cost / task ($)" value={form.declared_cost_usd} onChange={(e) => set("declared_cost_usd", e.target.value)} placeholder="0.35" />
         </div>
         <div className="mt-6 flex items-center gap-4">

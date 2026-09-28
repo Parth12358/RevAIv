@@ -12,7 +12,7 @@ export function setToken(t: string | null) {
 }
 
 export class ApiError extends Error {
-  constructor(message: string, public status: number, public paywall = false) {
+  constructor(message: string, public status: number, public paywall = false, public roles?: string[]) {
     super(message);
   }
 }
@@ -32,6 +32,7 @@ async function req<T>(path: string, opts: RequestInit = {}): Promise<T> {
       (data as { error?: string }).error ?? `HTTP ${res.status}`,
       res.status,
       (data as { paywall?: boolean }).paywall ?? false,
+      (data as { roles?: string[] }).roles,
     );
   }
   return data as T;
@@ -85,10 +86,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ email, password, role }),
     }),
-  login: (email: string, password: string) =>
+  login: (email: string, password: string, role?: Role) =>
     req<{ token: string; session: Session; membership_active: number; onboarded: number }>("/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, role }),
     }),
   me: () => req<{ session: Session; membership_active: number; onboarded: number; display_name: string | null }>("/auth/me"),
   onboard: (body: Record<string, unknown>) =>
@@ -158,4 +159,6 @@ export const api = {
   adminReviews: () => req<{ reviews: any[] }>("/admin/reviews"),
   setTaskStatus: (id: string, status: string) =>
     req<{ ok: boolean }>(`/admin/tasks/${id}/status`, { method: "POST", body: JSON.stringify({ status }) }),
+  impersonate: (role: "member" | "reviewer") =>
+    req<{ token: string; session: Session }>("/admin/impersonate", { method: "POST", body: JSON.stringify({ role }) }),
 };

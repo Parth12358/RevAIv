@@ -30,12 +30,17 @@ app.post("/signup", async (c) => {
 
 app.post("/login", async (c) => {
   try {
-    const { email, password } = await c.req.json<{ email: string; password: string }>();
-    const { token, session } = await authenticate(c.env, email, password);
+    const { email, password, role } = await c.req.json<{ email: string; password: string; role?: Role }>();
+    const { token, session } = await authenticate(c.env, email, password, role);
     const status = await accountStatus(c.env, session.userId);
     return c.json({ token, ...accountPayload(session, status) });
   } catch (e) {
-    if (e instanceof AuthError) return c.json({ error: e.message }, e.status as 401);
+    if (e instanceof AuthError) {
+      // Ambiguous: same email+password on both a customer and reviewer account.
+      const roles = (e as AuthError & { roles?: Role[] }).roles;
+      if (roles) return c.json({ error: "choose_role", roles }, 409);
+      return c.json({ error: e.message }, e.status as 401);
+    }
     return c.json({ error: (e as Error).message }, 400);
   }
 });

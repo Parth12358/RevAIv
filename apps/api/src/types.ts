@@ -16,10 +16,12 @@ export interface Env {
   STRIPE_SECRET_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;
   ENCRYPTION_KEY?: string;
+  BRAINBASE_API_KEY?: string;   // run Brainbase-hosted agents
+  OPERATOR_TOKEN?: string;      // Brainbase worker / operator ingestion auth
 }
 
 export type Role = "member" | "reviewer" | "admin";
-export type AdapterType = "http" | "mcp" | "claude_wrapper";
+export type AdapterType = "http" | "mcp" | "claude_wrapper" | "brainbase";
 export type RunStatus = "queued" | "running" | "done" | "failed";
 export type Confidence = "low" | "medium" | "high";
 

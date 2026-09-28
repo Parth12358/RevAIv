@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { Label, Button, Field, Select, TextArea, Tag, Ornament } from "../components/ui";
 
-type Tab = "tasks" | "manual" | "agents" | "users" | "reviews";
+type Tab = "emulate" | "tasks" | "manual" | "agents" | "users" | "reviews";
 const TABS: { key: Tab; label: string }[] = [
+  { key: "emulate", label: "Emulate Users" },
   { key: "tasks", label: "Tasks & Approvals" },
   { key: "manual", label: "Manual Run" },
   { key: "agents", label: "Agents" },
@@ -12,7 +15,7 @@ const TABS: { key: Tab; label: string }[] = [
 ];
 
 export default function Admin() {
-  const [tab, setTab] = useState<Tab>("tasks");
+  const [tab, setTab] = useState<Tab>("emulate");
   return (
     <div>
       <Label className="text-editorial">The Back Office · Admin</Label>
@@ -28,6 +31,7 @@ export default function Admin() {
       </div>
 
       <div className="mt-6">
+        {tab === "emulate" && <EmulateTab />}
         {tab === "tasks" && <TasksTab />}
         {tab === "manual" && <ManualRunTab />}
         {tab === "agents" && <AgentsTab />}
@@ -35,6 +39,36 @@ export default function Admin() {
         {tab === "reviews" && <ReviewsTab />}
       </div>
       <Ornament />
+    </div>
+  );
+}
+
+function EmulateTab() {
+  const { impersonate } = useAuth();
+  const nav = useNavigate();
+  const [busy, setBusy] = useState<string | null>(null);
+  async function go(role: "member" | "reviewer") {
+    setBusy(role);
+    try { await impersonate(role); nav("/app"); } finally { setBusy(null); }
+  }
+  return (
+    <div>
+      <p className="font-body text-lg text-neutral-700 max-w-2xl">
+        View the platform exactly as a customer or a reviewer would — a ready-made demo account
+        (onboarded, and for the customer, already subscribed). A banner lets you jump back to admin.
+      </p>
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 border-l border-t border-ink max-w-3xl">
+        <div className="border-r border-b border-ink p-6">
+          <div className="font-serif font-bold text-2xl">Customer</div>
+          <p className="mt-1 font-body text-neutral-600">Browse the directory, submit an agent, manage a membership.</p>
+          <div className="mt-4"><Button onClick={() => go("member")} disabled={!!busy}>{busy === "member" ? "Switching…" : "View as Customer"}</Button></div>
+        </div>
+        <div className="border-r border-b border-ink p-6">
+          <div className="font-serif font-bold text-2xl">Reviewer</div>
+          <p className="mt-1 font-body text-neutral-600">Claim outputs, score the rubric, write tasks (qualified demo profile).</p>
+          <div className="mt-4"><Button onClick={() => go("reviewer")} disabled={!!busy}>{busy === "reviewer" ? "Switching…" : "View as Reviewer"}</Button></div>
+        </div>
+      </div>
     </div>
   );
 }

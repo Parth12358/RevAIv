@@ -3,6 +3,7 @@ import type { AdapterResult, AdapterType, Env, Task } from "../types";
 import { runHttp } from "./http";
 import { runClaudeWrapper } from "./claude";
 import { runMcp } from "./mcp";
+import { runBrainbase } from "./brainbase";
 
 export interface AgentSpec {
   adapter_type: AdapterType;
@@ -21,6 +22,8 @@ export async function runAdapter(
       return runHttp(agent, task);
     case "claude_wrapper":
       return runClaudeWrapper(env, agent, task);
+    case "brainbase":
+      return runBrainbase(env, agent, task);
     case "mcp":
       return runMcp(agent, task);
     default:
