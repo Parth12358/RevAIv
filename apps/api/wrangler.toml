@@ -21,7 +21,7 @@ crons = ["0 3 * * *"]
 
 # ---- Non-secret vars ----
 [vars]
-APP_BASE_URL = "http://localhost:5173"
+APP_BASE_URL = "https://agent-trust-web.pages.dev"
 API_BASE_URL = "http://localhost:8787"
 VETTING_PRICE_CENTS = "40000"
 MEMBERSHIP_PRICE_CENTS = "20000"
