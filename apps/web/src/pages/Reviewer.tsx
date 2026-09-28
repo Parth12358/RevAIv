@@ -67,14 +67,14 @@ export default function Reviewer() {
       {message && !needQual && (
         <div className="mt-12 text-center">
           <p className="font-mono text-sm text-neutral-500">{message}</p>
-          <div className="mt-4"><Button variant="secondary" onClick={claim}>Refresh queue</Button></div>
+          <div className="mt-4"><Button variant="secondary" onClick={() => claim()}>Refresh queue</Button></div>
         </div>
       )}
 
       {toast && (
         <div className="mt-8 bg-ink text-paper p-4 flex items-center justify-between gap-4 flex-wrap">
           <span className="font-mono text-sm">{toast}</span>
-          <Button onClick={claim}>Claim next</Button>
+          <Button onClick={() => claim()}>Claim next</Button>
         </div>
       )}
 
