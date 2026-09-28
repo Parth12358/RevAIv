@@ -1,6 +1,78 @@
 // Newsprint UI atoms.
-import type { ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+
+// Bare registrable domain from a full URL (drops protocol, www, path).
+function domainFrom(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+// Agent logo pulled from the company's own domain, in a bordered newsprint
+// frame. Tries the company logo, then the site favicon, then a serif monogram —
+// so the frame is never empty, even if a source is blocked or slow to load.
+export function AgentLogo({
+  name,
+  url,
+  size = 44,
+}: {
+  name: string;
+  url: string | null | undefined;
+  size?: number;
+}) {
+  const domain = domainFrom(url);
+  const sources = useMemo(
+    () =>
+      domain
+        ? [
+            `https://logo.clearbit.com/${domain}`,
+            `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+          ]
+        : [],
+    [domain],
+  );
+  const [idx, setIdx] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+
+  // If the current source stalls (never loads and never errors), move on.
+  useEffect(() => {
+    if (loaded || idx >= sources.length) return;
+    const t = setTimeout(() => setIdx((i) => i + 1), 4000);
+    return () => clearTimeout(t);
+  }, [idx, loaded, sources.length]);
+
+  const box = "shrink-0 border border-ink bg-paper flex items-center justify-center overflow-hidden";
+  const dims = { height: size, width: size };
+
+  if (idx >= sources.length) {
+    return (
+      <div className={box} style={dims} aria-hidden>
+        <span className="font-serif font-black leading-none text-ink" style={{ fontSize: size * 0.5 }}>
+          {name.trim().charAt(0).toUpperCase() || "?"}
+        </span>
+      </div>
+    );
+  }
+  return (
+    <div className={box} style={dims}>
+      <img
+        key={sources[idx]}
+        src={sources[idx]}
+        alt=""
+        width={size}
+        height={size}
+        loading="lazy"
+        className="object-contain p-1.5"
+        onLoad={() => setLoaded(true)}
+        onError={() => setIdx((i) => i + 1)}
+      />
+    </div>
+  );
+}
 
 export function Label({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <span className={`label text-ink/70 ${className}`}>{children}</span>;

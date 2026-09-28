@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, ApiError, type DirectoryAgent } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { Label, LinkButton, ScoreBadge, Ornament, Tag } from "../components/ui";
+import { Label, LinkButton, ScoreBadge, Ornament, Tag, AgentLogo } from "../components/ui";
 
 const SORTS = [
   { key: "trust", label: "Trust" },
@@ -122,7 +122,10 @@ export default function Directory() {
             >
               <div>
                 <div className="flex items-start justify-between gap-4">
-                  <h3 className="font-serif font-bold text-2xl leading-tight group-hover:text-editorial transition-colors">{a.name}</h3>
+                  <div className="flex items-start gap-3 min-w-0">
+                    <AgentLogo name={a.name} url={a.owner_url} />
+                    <h3 className="font-serif font-bold text-2xl leading-tight group-hover:text-editorial transition-colors">{a.name}</h3>
+                  </div>
                   <ScoreBadge trust={a.trust} confidence={a.confidence} size="sm" />
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
