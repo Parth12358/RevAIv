@@ -4,3 +4,9 @@ dist
 .dev.vars
 .DS_Store
 *.log
+.deepseek.env
+.gemini.env
+.tavily.env
+.exa.env
+.groq.env
+.openai.env

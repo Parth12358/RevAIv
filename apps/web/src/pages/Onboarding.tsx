@@ -15,6 +15,7 @@ export default function Onboarding() {
   const [headline, setHeadline] = useState("");
   const [country, setCountry] = useState("");
   const [bio, setBio] = useState("");
+  const [linkedin, setLinkedin] = useState("");
   const [expertise, setExpertise] = useState<string[]>([]);
   const [cats, setCats] = useState<{ key: string; label: string }[]>([]);
   const [busy, setBusy] = useState(false);
@@ -41,6 +42,7 @@ export default function Onboarding() {
         expertise,
         bio: bio || undefined,
         country: country || undefined,
+        linkedin_url: linkedin || undefined,
       });
       await refresh();
       nav("/app", { replace: true });
@@ -69,6 +71,7 @@ export default function Onboarding() {
           <>
             <Field label="Headline" value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="B2B SaaS GTM · ex-Outreach" />
             <Field label="Country" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="United States" />
+            <Field label="LinkedIn (optional)" type="url" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} placeholder="https://linkedin.com/in/you" />
             <div>
               <Label className="block mb-2">Fields you can review</Label>
               <div className="flex flex-wrap gap-2">

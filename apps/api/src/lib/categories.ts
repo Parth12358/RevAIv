@@ -20,6 +20,12 @@ export const CATEGORIES: { key: string; label: string }[] = [
   { key: "real_estate", label: "Real estate" },
   { key: "patents_ip", label: "Patents & IP" },
   { key: "insurance", label: "Insurance (brokerage)" },
+  { key: "document_extraction", label: "Document data extraction" },
+  { key: "voice_receptionist", label: "Phone receptionist (voice)" },
+  { key: "meeting_notes", label: "Meeting transcription & summary" },
+  { key: "web_research", label: "Web research" },
+  { key: "presentations", label: "Presentations" },
+  { key: "resumes", label: "Careers & resumes" },
 ];
 
 export const CATEGORY_KEYS = CATEGORIES.map((c) => c.key);

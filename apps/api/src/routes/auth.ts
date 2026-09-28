@@ -65,6 +65,7 @@ app.post("/onboard", requireAuth(), async (c) => {
     expertise?: string[];
     bio?: string;
     country?: string;
+    linkedin_url?: string;
   }>();
 
   await run(
@@ -79,15 +80,16 @@ app.post("/onboard", requireAuth(), async (c) => {
   if (session.role === "reviewer") {
     await run(
       c.env,
-      `INSERT INTO reviewer_stats (reviewer_id, qualified, gold_accuracy, headline, expertise_json, bio, country)
+      `INSERT INTO reviewer_stats (reviewer_id, qualified, gold_accuracy, headline, expertise_json, bio, country, linkedin_url)
        VALUES (?1, COALESCE((SELECT qualified FROM reviewer_stats WHERE reviewer_id=?1),0),
-               COALESCE((SELECT gold_accuracy FROM reviewer_stats WHERE reviewer_id=?1),0.5), ?2, ?3, ?4, ?5)
-       ON CONFLICT(reviewer_id) DO UPDATE SET headline=?2, expertise_json=?3, bio=?4, country=?5`,
+               COALESCE((SELECT gold_accuracy FROM reviewer_stats WHERE reviewer_id=?1),0.5), ?2, ?3, ?4, ?5, ?6)
+       ON CONFLICT(reviewer_id) DO UPDATE SET headline=?2, expertise_json=?3, bio=?4, country=?5, linkedin_url=?6`,
       session.userId,
       body.headline ?? null,
       JSON.stringify(body.expertise ?? []),
       body.bio ?? null,
       body.country ?? null,
+      body.linkedin_url ?? null,
     );
   }
 

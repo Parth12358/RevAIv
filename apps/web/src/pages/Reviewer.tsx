@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api, type ReviewTarget } from "../lib/api";
 import { Label, Button, LinkButton, Tag, Ornament } from "../components/ui";
 import { RubricForm } from "../components/RubricForm";
+import { MarkdownView } from "../components/MarkdownView";
 
 export default function Reviewer() {
   const [target, setTarget] = useState<ReviewTarget | null>(null);
@@ -79,9 +80,7 @@ export default function Reviewer() {
             <p className="mt-2 font-body text-lg leading-relaxed">{target.prompt}</p>
             <div className="mt-6">
               <Label>Agent Output · Fig. 1.1</Label>
-              <pre className="mt-2 border border-ink bg-neutral-100 p-4 font-mono text-xs whitespace-pre-wrap max-h-96 overflow-auto">
-                {typeof target.output === "string" ? target.output : JSON.stringify(target.output, null, 2)}
-              </pre>
+              <MarkdownView value={target.output} className="mt-2 max-h-[32rem]" />
               <p className="mt-2 font-mono text-[0.65rem] text-neutral-500 uppercase tracking-widest">Reviewer is blind to which agent produced this output.</p>
             </div>
           </div>

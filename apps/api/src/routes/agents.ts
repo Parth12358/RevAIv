@@ -21,7 +21,9 @@ app.get("/", async (c) => {
   const rows = await all<Record<string, unknown>>(
     c.env,
     `SELECT a.id, a.name, a.category, a.adapter_type, a.owner_url,
-            s.trust, s.quality, s.cost, s.speed, s.confidence, s.flagged_drop, s.computed_at
+            s.trust, s.quality, s.cost, s.speed, s.confidence, s.flagged_drop, s.computed_at,
+            (SELECT COUNT(*) FROM runs r2 JOIN agent_versions av2 ON av2.id = r2.agent_version_id
+              WHERE av2.agent_id = a.id AND r2.status = 'done') AS done_runs
        FROM agents a
        LEFT JOIN agent_versions av ON av.agent_id = a.id
        LEFT JOIN (
@@ -38,8 +40,8 @@ app.get("/", async (c) => {
   return c.json({ agents: rows });
 });
 
-// GET /agents/:id — score breakdown + version history (membership-gated).
-app.get("/:id", requireMembership(), async (c) => {
+// GET /agents/:id — score breakdown + version history (public for the demo).
+app.get("/:id", async (c) => {
   const agentId = c.req.param("id");
   const agent = await first<Record<string, unknown>>(
     c.env,
@@ -76,7 +78,8 @@ app.get("/:id", requireMembership(), async (c) => {
     c.env,
     `SELECT rv.overall, rv.reason, rv.created_at,
             u.display_name AS reviewer_name, rs.headline AS reviewer_headline,
-            rs.expertise_json AS reviewer_expertise, rs.gold_accuracy AS reviewer_accuracy
+            rs.expertise_json AS reviewer_expertise, rs.gold_accuracy AS reviewer_accuracy,
+            rs.linkedin_url AS reviewer_linkedin
        FROM reviews rv
        JOIN runs r ON r.id = rv.run_id
        JOIN agent_versions av ON av.id = r.agent_version_id

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import type { Role } from "../lib/api";
 import { Button, Field } from "../components/ui";
@@ -12,7 +12,9 @@ const ROLES: { key: Role; title: string; blurb: string }[] = [
 export default function Join() {
   const { session, signup } = useAuth();
   const nav = useNavigate();
-  const [role, setRole] = useState<Role>("member");
+  const [params] = useSearchParams();
+  const initialRole: Role = params.get("role") === "reviewer" ? "reviewer" : "member";
+  const [role, setRole] = useState<Role>(initialRole);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);

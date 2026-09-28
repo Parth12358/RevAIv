@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, ApiError, type DirectoryAgent } from "../lib/api";
 import { useAuth } from "../lib/auth";
-import { Label, LinkButton, ScoreBadge, Ornament } from "../components/ui";
+import { Label, LinkButton, ScoreBadge, Ornament, Tag } from "../components/ui";
 
 const SORTS = [
   { key: "trust", label: "Trust" },
@@ -101,6 +101,10 @@ export default function Directory() {
         ))}
       </div>
 
+      <p className="py-3 font-mono text-[0.65rem] uppercase tracking-widest text-neutral-500">
+        <span className="text-ink">Connected · live</span> = a real API we run and score · <span className="text-ink">Catalog</span> = listed service, run manually or awaiting connection
+      </p>
+
       {loading ? (
         <p className="py-16 text-center font-mono text-sm text-neutral-500">Setting type…</p>
       ) : agents.length === 0 ? (
@@ -121,9 +125,10 @@ export default function Directory() {
                   <h3 className="font-serif font-bold text-2xl leading-tight group-hover:text-editorial transition-colors">{a.name}</h3>
                   <ScoreBadge trust={a.trust} confidence={a.confidence} size="sm" />
                 </div>
-                {a.flagged_drop === 1 && (
-                  <span className="inline-block mt-3 bg-editorial text-paper label text-[0.55rem] px-2 py-1">Score dropped 10+</span>
-                )}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {(a.done_runs ?? 0) > 0 ? <Tag tone="solid">Connected · live</Tag> : <Tag tone="outline">Catalog</Tag>}
+                  {a.flagged_drop === 1 && <Tag tone="editorial">Score dropped 10+</Tag>}
+                </div>
               </div>
               <div className="mt-4 pt-4 border-t border-divider flex items-center justify-between font-mono text-[0.65rem] uppercase tracking-widest text-neutral-500">
                 <span>{a.category.replace(/_/g, " ")}</span>

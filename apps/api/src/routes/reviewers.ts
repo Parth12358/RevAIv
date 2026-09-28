@@ -28,7 +28,7 @@ app.get("/public", async (c) => {
   const rows = await all<Record<string, unknown>>(
     c.env,
     `SELECT u.id, u.display_name, rs.headline, rs.expertise_json, rs.bio, rs.country,
-            rs.gold_accuracy, rs.reviews_count
+            rs.gold_accuracy, rs.reviews_count, rs.linkedin_url
        FROM reviewer_stats rs JOIN users u ON u.id = rs.reviewer_id
       WHERE rs.qualified = 1
       ORDER BY rs.reviews_count DESC`,

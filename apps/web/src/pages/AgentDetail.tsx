@@ -100,7 +100,12 @@ export default function AgentDetail() {
               <div key={i} className="border-r border-b border-ink p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-serif font-bold text-lg">{r.reviewer_name ?? "Anonymous reviewer"}</div>
+                    <div className="font-serif font-bold text-lg flex items-center gap-2">
+                      {r.reviewer_name ?? "Anonymous reviewer"}
+                      {r.reviewer_linkedin && (
+                        <a href={r.reviewer_linkedin} target="_blank" rel="noreferrer" className="font-mono text-[0.55rem] uppercase tracking-widest text-editorial hover:underline">in ↗</a>
+                      )}
+                    </div>
                     {r.reviewer_headline && <div className="font-mono text-[0.65rem] uppercase tracking-widest text-neutral-500">{r.reviewer_headline}</div>}
                   </div>
                   <div className="font-mono text-2xl">{r.overall?.toFixed?.(1) ?? r.overall}</div>

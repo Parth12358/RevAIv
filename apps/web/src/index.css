@@ -111,3 +111,40 @@
     padding: 0.1em 0.12em 0 0;
   }
 }
+
+/* ---- Rendered Markdown (agent outputs) — Newsprint prose ---- */
+.md-prose h1, .md-prose h2, .md-prose h3, .md-prose h4 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 1em 0 0.4em;
+}
+.md-prose h1 { font-size: 1.6rem; }
+.md-prose h2 { font-size: 1.35rem; }
+.md-prose h3 { font-size: 1.15rem; }
+.md-prose h4 { font-size: 1rem; }
+.md-prose p { margin: 0.6em 0; }
+.md-prose ul, .md-prose ol { margin: 0.6em 0; padding-left: 1.4em; }
+.md-prose ul { list-style: disc; }
+.md-prose ol { list-style: decimal; }
+.md-prose li { margin: 0.25em 0; }
+.md-prose strong { font-weight: 700; }
+.md-prose em { font-style: italic; }
+.md-prose a { color: #111; }
+.md-prose hr { border: 0; border-top: 1px solid #111; margin: 1em 0; }
+.md-prose blockquote {
+  border-left: 3px solid #111; margin: 0.8em 0; padding: 0.2em 0 0.2em 1em; color: #525252;
+}
+.md-prose code {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.85em;
+  background: #E5E5E0; padding: 0.1em 0.3em;
+}
+.md-prose pre {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+  background: #F5F5F5; border: 1px solid #111; padding: 0.8em; overflow-x: auto; margin: 0.8em 0;
+}
+.md-prose pre code { background: none; padding: 0; }
+.md-prose table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 0.85em; }
+.md-prose th, .md-prose td { border: 1px solid #111; padding: 0.4em 0.6em; text-align: left; vertical-align: top; }
+.md-prose th { background: #111; color: #F9F9F7; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.8em; }
+.md-prose img { max-width: 100%; }

@@ -73,6 +73,11 @@ export default function Account() {
             {(rstats.expertise ?? []).map((e: string) => <Tag key={e}>{e.replace(/_/g, " ")}</Tag>)}
           </div>
           {rstats.bio && <p className="mt-3 font-body text-neutral-700">{rstats.bio}</p>}
+          {rstats.linkedin_url && (
+            <a href={rstats.linkedin_url} target="_blank" rel="noreferrer" className="mt-3 inline-block label text-[0.65rem] underline decoration-2 decoration-editorial underline-offset-4 hover:text-editorial">
+              LinkedIn ↗
+            </a>
+          )}
         </div>
       )}
 
