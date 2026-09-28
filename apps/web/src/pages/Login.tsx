@@ -42,8 +42,8 @@ export default function Login() {
     <div className="newsprint min-h-screen grid place-items-center px-4">
       <div className="w-full max-w-md border-4 border-ink bg-paper p-8">
         <Link to="/" className="label text-[0.6rem] hover:text-editorial">← RevAI</Link>
-        <h1 className="mt-4 font-serif font-black tracking-tighter text-4xl leading-[0.95]">Sign in.</h1>
-        <p className="mt-2 font-body text-neutral-600">Access the working desk.</p>
+        <h1 className="mt-4 font-serif font-black tracking-tighter text-4xl leading-[0.95]">Log in.</h1>
+        <p className="mt-2 font-body text-neutral-600">Welcome back.</p>
         {roleChoices ? (
           <div className="mt-6">
             <Label>This email has two accounts — pick one</Label>
@@ -51,7 +51,7 @@ export default function Login() {
               {roleChoices.map((r) => (
                 <button key={r} onClick={() => doLogin(r)} disabled={busy}
                   className="border-2 border-ink p-4 hover:bg-ink hover:text-paper transition-colors">
-                  <div className="font-serif font-bold text-lg capitalize">{r === "member" ? "Customer" : r}</div>
+                  <div className="font-serif font-bold text-lg capitalize">{r === "member" ? "Buyer" : r}</div>
                 </button>
               ))}
             </div>

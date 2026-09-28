@@ -1,22 +1,19 @@
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./lib/auth";
-import { TourProvider } from "./lib/tour";
 import type { Role } from "./lib/api";
 import { NewsprintLayout } from "./components/NewsprintLayout";
 import { AppShell } from "./components/AppShell";
-import { TourOverlay } from "./components/TourOverlay";
 
-// Front-of-house pages
+// Public pages
 import Home from "./pages/Home";
 import Directory from "./pages/Directory";
 import AgentDetail from "./pages/AgentDetail";
 import Reviewers from "./pages/Reviewers";
 import ReviewerProfile from "./pages/ReviewerProfile";
-// Internal platform pages
+// Signed-in pages
 import Login from "./pages/Login";
 import Join from "./pages/Join";
-import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import Account from "./pages/Account";
 import Submit from "./pages/Submit";
@@ -30,46 +27,33 @@ function News({ children }: { children: ReactNode }) {
   return <NewsprintLayout>{children}</NewsprintLayout>;
 }
 
-// Guard for internal platform routes. Redirects unauthenticated users to /login
-// and un-onboarded non-admins to /onboarding.
-function Protected({
-  children,
-  roles,
-  skipOnboardGate = false,
-}: {
-  children: ReactNode;
-  roles?: Role[];
-  skipOnboardGate?: boolean;
-}) {
-  const { session, onboarded, loading } = useAuth();
+// Guard for signed-in pages. Sends signed-out users to /login, and anyone
+// without the right role back to their home page.
+function Protected({ children, roles }: { children: ReactNode; roles?: Role[] }) {
+  const { session, loading } = useAuth();
   const loc = useLocation();
   if (loading) return <div className="newsprint min-h-screen grid place-items-center font-mono text-sm text-neutral-500">Loading…</div>;
   if (!session) return <Navigate to="/login" state={{ from: loc.pathname }} replace />;
   if (roles && !roles.includes(session.role)) return <Navigate to="/app" replace />;
-  if (!skipOnboardGate && !onboarded && session.role !== "admin") return <Navigate to="/onboarding" replace />;
   return <AppShell>{children}</AppShell>;
 }
 
 export default function App() {
   return (
     <AuthProvider>
-      <TourProvider>
       <Routes>
-        {/* Front-of-house — Newsprint */}
+        {/* Public */}
         <Route path="/" element={<News><Home /></News>} />
         <Route path="/directory" element={<News><Directory /></News>} />
         <Route path="/agents/:id" element={<News><AgentDetail /></News>} />
         <Route path="/reviewers" element={<News><Reviewers /></News>} />
         <Route path="/reviewers/:id" element={<News><ReviewerProfile /></News>} />
 
-        {/* Auth — standalone (no shell) */}
+        {/* Auth — no shell */}
         <Route path="/login" element={<Login />} />
         <Route path="/join" element={<Join />} />
 
-        {/* Onboarding — inside the shell but skips its own gate */}
-        <Route path="/onboarding" element={<Protected skipOnboardGate><Onboarding /></Protected>} />
-
-        {/* Internal platform */}
+        {/* Signed-in */}
         <Route path="/app" element={<Protected><Dashboard /></Protected>} />
         <Route path="/account" element={<Protected><Account /></Protected>} />
         <Route path="/submit" element={<Protected roles={["member", "admin"]}><Submit /></Protected>} />
@@ -81,8 +65,6 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <TourOverlay />
-      </TourProvider>
     </AuthProvider>
   );
 }

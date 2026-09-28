@@ -26,7 +26,7 @@ export function Ticker() {
     api
       .stats()
       .then((s) => {
-        const live: Item[] = [{ text: `${s.scored} agents with a published trust score on this ledger` }];
+        const live: Item[] = [{ text: `${s.scored} AI agents now have a score on RevAI` }];
         // interleave one live stat near the front
         setItems([ARTICLES[0], ...live, ...ARTICLES.slice(1)]);
       })

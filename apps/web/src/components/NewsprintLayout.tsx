@@ -14,17 +14,17 @@ const EDITION_DATE = new Date().toLocaleDateString("en-US", {
 function Masthead() {
   const { session } = useAuth();
   const links = [
-    { to: "/", label: "Front Page", end: true },
-    { to: "/directory", label: "The Directory" },
-    { to: "/reviewers", label: "The Reviewers" },
+    { to: "/", label: "Home", end: true },
+    { to: "/directory", label: "Agents" },
+    { to: "/reviewers", label: "Reviewers" },
   ];
   return (
     <header className="sticky top-0 z-40 bg-paper border-b-4 border-ink">
       <div className="border-b border-ink">
         <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between gap-3 h-8 font-mono text-[0.65rem] uppercase tracking-widest text-neutral-600">
-          <span className="truncate">Vol. 1 · {EDITION_DATE}</span>
-          <span className="hidden md:block truncate">The Trust Record for AI Agents · Independently Reviewed</span>
-          <span className="hidden sm:block shrink-0">Est. 2026</span>
+          <span className="truncate">{EDITION_DATE}</span>
+          <span className="hidden md:block truncate">Find AI agents you can trust</span>
+          <span className="hidden sm:block shrink-0">RevAI</span>
         </div>
       </div>
       <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
@@ -34,7 +34,7 @@ function Masthead() {
         <div className="flex items-center gap-3 sm:gap-4 shrink-0">
           {session ? (
             <Link to="/app" className="label text-[0.65rem] hover:text-editorial">
-              Enter Platform →
+              Go to my account →
             </Link>
           ) : (
             <>
@@ -71,23 +71,23 @@ function Footer() {
         <div className="col-span-2">
           <div className="font-serif font-black text-2xl tracking-tighter">RevAI</div>
           <p className="mt-3 font-body text-neutral-400 text-sm max-w-sm leading-relaxed">
-            A membership directory of AI agents, scored on real tasks judged by vetted human
-            reviewers and re-tested on every version. Scores are opinions, not guarantees.
+            We test AI agents on real tasks and let people who know the field rate them.
+            Each agent gets one clear score. Scores are opinions, not promises.
           </p>
         </div>
         <div>
-          <div className="label text-neutral-500 mb-3">Sections</div>
+          <div className="label text-neutral-500 mb-3">Pages</div>
           <ul className="space-y-2 font-sans text-sm">
-            <li><Link to="/" className="hover:text-editorial">Front Page</Link></li>
-            <li><Link to="/directory" className="hover:text-editorial">The Directory</Link></li>
-            <li><Link to="/reviewers" className="hover:text-editorial">The Reviewers</Link></li>
-            <li><Link to="/join" className="hover:text-editorial">Join</Link></li>
+            <li><Link to="/" className="hover:text-editorial">Home</Link></li>
+            <li><Link to="/directory" className="hover:text-editorial">Agents</Link></li>
+            <li><Link to="/reviewers" className="hover:text-editorial">Reviewers</Link></li>
+            <li><Link to="/join" className="hover:text-editorial">Sign up</Link></li>
           </ul>
         </div>
         <div>
-          <div className="label text-neutral-500 mb-3">Colophon</div>
+          <div className="label text-neutral-500 mb-3">About</div>
           <p className="font-mono text-[0.7rem] text-neutral-400 leading-relaxed">
-            Edition: Vol 1.0<br />Published on the web<br />Set in Playfair &amp; Lora
+            Built on Cloudflare<br />Scored by real people<br />Made in 2026
           </p>
         </div>
       </div>

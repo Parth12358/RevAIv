@@ -66,11 +66,11 @@ export default function AgentDetail() {
   if (gate)
     return (
       <section className="py-20 text-center">
-        <Label className="text-editorial">{gate === "login" ? "Members Only" : "Subscription Required"}</Label>
-        <h1 className="mt-3 font-serif font-black text-5xl">{gate === "login" ? "Sign in to read this dossier." : "Subscribe to read this dossier."}</h1>
+        <Label className="text-editorial">{gate === "login" ? "Members only" : "Members only"}</Label>
+        <h1 className="mt-3 font-serif font-black text-5xl">{gate === "login" ? "Log in to see this agent." : "Join to see this agent."}</h1>
         <div className="mt-6 flex justify-center gap-4">
           {gate === "login" ? <LinkButton to="/login">Sign in</LinkButton> : <LinkButton to="/account">Subscribe</LinkButton>}
-          <LinkButton to="/directory" variant="secondary">Back to Directory</LinkButton>
+          <LinkButton to="/directory" variant="secondary">Back to agents</LinkButton>
         </div>
       </section>
     );
@@ -85,18 +85,18 @@ export default function AgentDetail() {
 
   return (
     <article className="py-8">
-      <Link to="/directory" className="label text-[0.65rem] hover:text-editorial">← Back to Directory</Link>
+      <Link to="/directory" className="label text-[0.65rem] hover:text-editorial">← Back to agents</Link>
 
       <header className="mt-4 border-b-4 border-ink pb-8 grid grid-cols-12 gap-0">
         <div className="col-span-12 lg:col-span-8 lg:border-r border-ink lg:pr-8">
-          <Label className="text-editorial">Agent Dossier · {agent.category?.replace(/_/g, " ")}</Label>
+          <Label className="text-editorial">Agent · {agent.category?.replace(/_/g, " ")}</Label>
           <h1 className="mt-3 font-serif font-black tracking-tighter leading-[0.92] text-5xl lg:text-7xl">{agent.name}</h1>
           <p className="mt-4 font-mono text-xs uppercase tracking-widest text-neutral-500">
             {agent.adapter_type?.replace(/_/g, " ")}
             {agent.owner_url ? ` · ${new URL(agent.owner_url).hostname}` : ""}
           </p>
           {latest?.flagged_drop === 1 && (
-            <span className="inline-block mt-4 bg-editorial text-paper label text-[0.6rem] px-3 py-1">Score dropped 10+ points on last re-test</span>
+            <span className="inline-block mt-4 bg-editorial text-paper label text-[0.6rem] px-3 py-1">Score dropped on the last test</span>
           )}
         </div>
         <div className="col-span-12 lg:col-span-4 mt-6 lg:mt-0 lg:pl-8 flex items-center justify-center">
@@ -107,7 +107,7 @@ export default function AgentDetail() {
       {/* Breakdown + baseline */}
       <section className="grid grid-cols-12 gap-0 border-b border-ink">
         <div className="col-span-12 lg:col-span-5 py-8 lg:border-r border-ink lg:pr-8">
-          <Label>The Score, Broken Down</Label>
+          <Label>The score</Label>
           {latest ? (
             <div className="mt-5 space-y-5">
               <Meter label="Quality (60%)" value={latest.quality} />
@@ -118,11 +118,11 @@ export default function AgentDetail() {
               </p>
             </div>
           ) : (
-            <p className="mt-4 font-body text-neutral-500">Not yet scored. Needs at least 5 reviewed tasks to publish.</p>
+            <p className="mt-4 font-body text-neutral-500">No score yet. It needs a few reviews first.</p>
           )}
         </div>
         <div className="col-span-12 lg:col-span-7 py-8 lg:pl-8">
-          <Label>Agent vs. Human Baseline</Label>
+          <Label>Agent vs. a person</Label>
           {baseline && latest ? (
             <div className="mt-5 grid grid-cols-2 border-l border-t border-ink font-mono text-sm">
               <div className="border-r border-b border-ink p-4"><div className="label text-[0.6rem] text-neutral-500">Human · cost / task</div><div className="text-2xl mt-1">${baseline.cost_usd.toFixed(2)}</div></div>
@@ -153,8 +153,8 @@ export default function AgentDetail() {
         return (
           <section className="py-8 border-b border-ink">
             <div className="flex items-center gap-3">
-              <Label>Methodology · How this score is computed</Label>
-              <Tag tone="outline">auditable</Tag>
+              <Label>How we got this score</Label>
+              <Tag tone="outline">how it's worked out</Tag>
             </div>
 
             <div className="mt-5 border border-ink bg-paper p-5 overflow-x-auto">
@@ -237,7 +237,7 @@ export default function AgentDetail() {
           <section className="py-8 border-b border-ink grid grid-cols-12 gap-0">
             <div className="col-span-12 lg:col-span-7 lg:border-r border-ink lg:pr-8">
               <div className="flex items-center gap-3">
-                <Label>How to Run This Agent</Label>
+                <Label>How to run this agent</Label>
                 {agent.is_demo === 1 ? (
                   <Tag tone="outline">Demo · sample data</Tag>
                 ) : connected ? (
@@ -267,7 +267,7 @@ export default function AgentDetail() {
               )}
             </div>
             <div className="col-span-12 lg:col-span-5 mt-6 lg:mt-0 lg:pl-8">
-              <Label>How We Score It</Label>
+              <Label>How scoring works</Label>
               <ol className="mt-5 space-y-3 font-body text-neutral-700">
                 <li className="flex gap-3"><span className="font-mono text-sm text-editorial shrink-0">1.</span><span className="leading-snug">Every agent in this field gets the same short task (under ~10 minutes of real work).</span></li>
                 <li className="flex gap-3"><span className="font-mono text-sm text-editorial shrink-0">2.</span><span className="leading-snug">We capture its output and route it <em>blind</em> to a vetted reviewer who works in this field.</span></li>
@@ -282,7 +282,7 @@ export default function AgentDetail() {
       {/* Reviews — the face behind the score */}
       {reviews && reviews.length > 0 && (
         <section className="py-8 border-b border-ink">
-          <Label>Reviewed By</Label>
+          <Label>Reviews</Label>
           <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-0 border-l border-t border-ink">
             {reviews.slice(0, 6).map((r: any, i: number) => (
               <div key={i} className="border-r border-b border-ink p-5">
@@ -344,7 +344,7 @@ export default function AgentDetail() {
       {/* History */}
       <section className="grid grid-cols-12 gap-0">
         <div className="col-span-12 lg:col-span-6 py-8 lg:border-r border-ink lg:pr-8">
-          <Label>Version History</Label>
+          <Label>Versions</Label>
           <ul className="mt-4 divide-y divide-divider">
             {versions.map((v: any) => (
               <li key={v.id} className="py-3 flex items-center justify-between font-mono text-xs">
@@ -356,7 +356,7 @@ export default function AgentDetail() {
           </ul>
         </div>
         <div className="col-span-12 lg:col-span-6 py-8 lg:pl-8">
-          <Label>Score History</Label>
+          <Label>Score over time</Label>
           <ul className="mt-4 divide-y divide-divider">
             {scores.length ? scores.map((s: any) => (
               <li key={s.id} className="py-3 flex items-center justify-between font-mono text-xs">

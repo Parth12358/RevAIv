@@ -72,22 +72,22 @@ export default function Submit() {
   if (done) {
     return (
       <div className="max-w-2xl">
-        <Label className="text-editorial">Submitted</Label>
+        <Label className="text-editorial">Done</Label>
         <h1 className="mt-2 font-serif font-black tracking-tighter text-4xl lg:text-5xl leading-[0.95]">
-          {done.running > 0 ? "Running the vetting tasks now." : "Agent listed."}
+          {done.running > 0 ? "Testing your agent now." : "Agent added."}
         </h1>
         <p className="mt-4 font-body text-lg text-neutral-700">
           {done.running > 0 ? (
-            <>Your agent is being run against <strong>{done.running}</strong> {done.running === 1 ? "task" : "tasks"} in this field. As each run finishes it enters the blind review queue; scores publish to the directory as reviewers grade them.</>
+            <>We're running your agent on <strong>{done.running}</strong> {done.running === 1 ? "task" : "tasks"} right now. As each one finishes, reviewers rate it, and the score shows up here as ratings come in.</>
           ) : (
-            <>Your agent is listed. It has no runnable tasks in this field yet — an operator will connect it.</>
+            <>Your agent is added. There are no tasks in this field yet, so we'll test it soon.</>
           )}
         </p>
         <div className="mt-6 flex flex-wrap gap-4">
-          <Link to={`/agents/${done.agent_id}`} className="bg-ink text-paper px-6 min-h-[44px] inline-flex items-center label text-[0.7rem] hover:bg-editorial transition-colors">View the dossier →</Link>
-          <Link to="/directory" className="border border-ink px-6 min-h-[44px] inline-flex items-center label text-[0.7rem] hover:bg-ink hover:text-paper transition-colors">Back to Directory</Link>
+          <Link to={`/agents/${done.agent_id}`} className="bg-ink text-paper px-6 min-h-[44px] inline-flex items-center label text-[0.7rem] hover:bg-editorial transition-colors">See your agent →</Link>
+          <Link to="/directory" className="border border-ink px-6 min-h-[44px] inline-flex items-center label text-[0.7rem] hover:bg-ink hover:text-paper transition-colors">Back to agents</Link>
         </div>
-        <p className="mt-6 font-mono text-[0.7rem] text-neutral-500">Runs take a few moments each. Refresh the dossier to watch scores appear.</p>
+        <p className="mt-6 font-mono text-[0.7rem] text-neutral-500">Each task takes a few moments. Refresh the agent page to watch the score appear.</p>
         <Ornament />
       </div>
     );
@@ -95,14 +95,14 @@ export default function Submit() {
 
   return (
     <div className="max-w-3xl">
-      <Label className="text-editorial">Classifieds · Submit for Vetting</Label>
-      <h1 className="mt-2 font-serif font-black tracking-tighter text-4xl lg:text-6xl leading-[0.92]">Get a trust score before you commit budget.</h1>
-      <p className="mt-3 font-body text-lg text-neutral-700 max-w-xl">Connect your agent's API and we run it against real tasks in its field — blind-reviewed by vetted experts.</p>
+      <Label className="text-editorial">Add an agent</Label>
+      <h1 className="mt-2 font-serif font-black tracking-tighter text-4xl lg:text-6xl leading-[0.92]">Get your agent tested and scored.</h1>
+      <p className="mt-3 font-body text-lg text-neutral-700 max-w-xl">Connect your agent and we'll run it on real tasks. People who know the field rate the answers — without seeing which agent wrote them.</p>
 
       <div className="mt-6 border-2 border-ink p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <Field label="Agent name" value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="ProspectFinder Pro" />
-          <Field label="Owner URL" value={form.owner_url} onChange={(e) => set("owner_url", e.target.value)} placeholder="https://vendor.example" />
+          <Field label="Website (optional)" value={form.owner_url} onChange={(e) => set("owner_url", e.target.value)} placeholder="https://vendor.example" />
           <Select label="Field" value={form.category} onChange={(e) => set("category", e.target.value)}>
             {cats.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
           </Select>
@@ -139,7 +139,7 @@ export default function Submit() {
             </>
           )}
 
-          <Field label="Declared cost / task ($)" value={form.declared_cost_usd} onChange={(e) => set("declared_cost_usd", e.target.value)} placeholder="0.35" />
+          <Field label="Cost per task, if you know it ($)" value={form.declared_cost_usd} onChange={(e) => set("declared_cost_usd", e.target.value)} placeholder="0.35" />
         </div>
 
         {isOpenAi && (
@@ -149,8 +149,8 @@ export default function Submit() {
         )}
 
         <div className="mt-6 flex items-center gap-4 flex-wrap">
-          <Button onClick={submit} disabled={busy || !canSubmit}>{busy ? "Running…" : "Submit & run vetting"}</Button>
-          <Tag>runs against this field's tasks</Tag>
+          <Button onClick={submit} disabled={busy || !canSubmit}>{busy ? "Working…" : "Add and test"}</Button>
+          <Tag>we run the field's tasks</Tag>
         </div>
         {msg && <p className="mt-4 font-mono text-xs text-editorial">{msg}</p>}
       </div>

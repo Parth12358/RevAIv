@@ -13,9 +13,9 @@ const SORTS = [
 type Tier = "all" | "connected" | "demo" | "catalog";
 const TIERS: { key: Tier; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "connected", label: "Connected · live" },
-  { key: "demo", label: "Demo · sample" },
-  { key: "catalog", label: "Catalog" },
+  { key: "connected", label: "Live" },
+  { key: "demo", label: "Sample" },
+  { key: "catalog", label: "Not tested yet" },
 ];
 
 function tierOf(a: DirectoryAgent): Exclude<Tier, "all"> {
@@ -28,9 +28,9 @@ function tierOf(a: DirectoryAgent): Exclude<Tier, "all"> {
 function Gate({ kind }: { kind: "login" | "paywall" }) {
   return (
     <section className="newsprint-texture py-20 text-center border-b border-ink">
-      <Label className="text-editorial">{kind === "login" ? "Members Only" : "Subscription Required"}</Label>
+      <Label className="text-editorial">{kind === "login" ? "Members only" : "Members only"}</Label>
       <h1 className="mt-4 font-serif font-black tracking-tighter text-5xl lg:text-7xl leading-[0.9]">
-        {kind === "login" ? "Sign in to read the ledger." : "Subscribe to read the ledger."}
+        {kind === "login" ? "Log in to see the scores." : "Join to see the scores."}
       </h1>
       <p className="mt-4 font-body text-lg text-neutral-700 max-w-xl mx-auto">
         {kind === "login"
@@ -113,13 +113,13 @@ export default function Directory() {
     <div>
       <section className="border-b-4 border-ink py-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <Label className="text-editorial">The Directory</Label>
+          <Label className="text-editorial">AI agents</Label>
           <h1 className="mt-2 font-serif font-black tracking-tighter text-5xl lg:text-6xl leading-[0.9]">
-            Vetted agents, ranked.
+            Every agent, scored.
           </h1>
         </div>
         <div className="flex items-center gap-4">
-          <span className="label text-[0.6rem] text-neutral-500">Rank by</span>
+          <span className="label text-[0.6rem] text-neutral-500">Sort by</span>
           {SORTS.map((s) => (
             <button
               key={s.key}
@@ -193,9 +193,9 @@ export default function Directory() {
             </div>
 
             <div className="border-t border-divider pt-4 font-mono text-[0.6rem] leading-relaxed text-neutral-500">
-              <p><span className="text-ink">Connected · live</span> — a real API we run &amp; score.</p>
-              <p className="mt-1"><span className="text-ink">Demo</span> — sample outputs, reviewable to show the flow.</p>
-              <p className="mt-1"><span className="text-ink">Catalog</span> — listed, awaiting connection.</p>
+              <p><span className="text-ink">Live</span> — a real agent we run and score.</p>
+              <p className="mt-1"><span className="text-ink">Sample</span> — example answers, to show how it works.</p>
+              <p className="mt-1"><span className="text-ink">Not tested yet</span> — listed, not connected yet.</p>
             </div>
           </div>
         </aside>
@@ -219,7 +219,7 @@ export default function Directory() {
           </div>
 
           {loading ? (
-            <p className="py-16 text-center font-mono text-sm text-neutral-500">Setting type…</p>
+            <p className="py-16 text-center font-mono text-sm text-neutral-500">Loading…</p>
           ) : filtered.length === 0 ? (
             <div className="py-16 text-center">
               <p className="font-body text-lg text-neutral-600">No agents match these filters.</p>
@@ -243,18 +243,18 @@ export default function Directory() {
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {a.is_demo === 1 ? (
-                        <Tag tone="outline">Demo · sample data</Tag>
+                        <Tag tone="outline">Sample data</Tag>
                       ) : (a.done_runs ?? 0) > 0 ? (
-                        <Tag tone="solid">Connected · live</Tag>
+                        <Tag tone="solid">Live</Tag>
                       ) : (
-                        <Tag tone="outline">Catalog</Tag>
+                        <Tag tone="outline">Not tested yet</Tag>
                       )}
-                      {a.flagged_drop === 1 && <Tag tone="editorial">Score dropped 10+</Tag>}
+                      {a.flagged_drop === 1 && <Tag tone="editorial">Score dropped</Tag>}
                     </div>
                   </div>
                   <div className="mt-4 pt-4 border-t border-divider flex items-center justify-between font-mono text-[0.65rem] uppercase tracking-widest text-neutral-500">
                     <span>{a.category.replace(/_/g, " ")}</span>
-                    <span className="group-hover:text-editorial">Read →</span>
+                    <span className="group-hover:text-editorial">See →</span>
                   </div>
                 </Link>
               ))}

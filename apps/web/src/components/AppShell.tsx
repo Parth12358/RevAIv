@@ -5,23 +5,24 @@ import { useAuth } from "../lib/auth";
 
 const NAV: Record<string, { to: string; label: string; external?: boolean }[]> = {
   member: [
-    { to: "/app", label: "Dashboard" },
-    { to: "/directory", label: "The Directory" },
-    { to: "/submit", label: "Submit Agent" },
+    { to: "/app", label: "Home" },
+    { to: "/directory", label: "Agents" },
+    { to: "/submit", label: "Add an agent" },
+    { to: "/find-experts", label: "Find experts" },
     { to: "/account", label: "Account" },
   ],
   reviewer: [
-    { to: "/app", label: "Dashboard" },
-    { to: "/review", label: "Review Desk" },
-    { to: "/write-task", label: "Write a Task" },
-    { to: "/directory", label: "The Directory" },
+    { to: "/app", label: "Home" },
+    { to: "/review", label: "Review" },
+    { to: "/write-task", label: "Write a task" },
+    { to: "/directory", label: "Agents" },
     { to: "/account", label: "Account" },
   ],
   admin: [
-    { to: "/app", label: "Dashboard" },
+    { to: "/app", label: "Home" },
     { to: "/admin", label: "Admin" },
-    { to: "/directory", label: "The Directory" },
-    { to: "/submit", label: "Submit Agent" },
+    { to: "/directory", label: "Agents" },
+    { to: "/submit", label: "Add an agent" },
   ],
 };
 
@@ -52,9 +53,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 bg-paper border-b-4 border-ink">
         <div className="border-b border-ink">
           <div className="max-w-screen-xl mx-auto px-4 flex items-center justify-between h-8 font-mono text-[0.65rem] uppercase tracking-widest text-neutral-600">
-            <span>Vol. 1 · {EDITION_DATE}</span>
-            <span className="hidden sm:block">The Working Desk · {session?.role} edition</span>
-            <span>Est. 2026</span>
+            <span>{EDITION_DATE}</span>
+            <span className="hidden sm:block">Signed in as {session?.role === "member" ? "buyer" : session?.role}</span>
+            <span>RevAI</span>
           </div>
         </div>
         <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
@@ -62,7 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             RevAI
           </Link>
           <div className="flex items-center gap-4">
-            <span className="hidden sm:inline label text-[0.6rem] text-neutral-500">{session?.role} · {session?.email}</span>
+            <span className="hidden sm:inline label text-[0.6rem] text-neutral-500">{session?.email}</span>
             <button
               onClick={() => { logout(); nav("/"); }}
               className="label text-[0.65rem] text-ink hover:text-editorial transition-colors"

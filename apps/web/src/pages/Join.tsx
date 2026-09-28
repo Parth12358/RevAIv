@@ -5,8 +5,8 @@ import type { Role } from "../lib/api";
 import { Button, Field } from "../components/ui";
 
 const ROLES: { key: Role; title: string; blurb: string }[] = [
-  { key: "member", title: "Customer", blurb: "Browse vetted agents and submit your own for a trust score." },
-  { key: "reviewer", title: "Reviewer", blurb: "Get paid to write tasks and judge agent outputs in your field." },
+  { key: "member", title: "Buyer", blurb: "See which AI agents are good, and test your own." },
+  { key: "reviewer", title: "Reviewer", blurb: "Get paid to rate AI agents in your field." },
 ];
 
 export default function Join() {
@@ -28,7 +28,7 @@ export default function Join() {
     setErr(null);
     try {
       await signup(email, password, role);
-      nav("/onboarding", { replace: true });
+      nav("/app", { replace: true });
     } catch (e) {
       setErr((e as Error).message);
     } finally {
@@ -40,8 +40,8 @@ export default function Join() {
     <div className="newsprint min-h-screen grid place-items-center px-4 py-10">
       <div className="w-full max-w-lg border-4 border-ink bg-paper p-8">
         <Link to="/" className="label text-[0.6rem] hover:text-editorial">← RevAI</Link>
-        <h1 className="mt-4 font-serif font-black tracking-tighter text-4xl leading-[0.95]">Create your account.</h1>
-        <p className="mt-2 font-body text-neutral-600">Choose how you'll use the platform.</p>
+        <h1 className="mt-4 font-serif font-black tracking-tighter text-4xl leading-[0.95]">Sign up.</h1>
+        <p className="mt-2 font-body text-neutral-600">Pick how you'll use RevAI.</p>
 
         <div className="mt-6 grid grid-cols-2 border-l border-t border-ink">
           {ROLES.map((r) => (
@@ -64,7 +64,7 @@ export default function Join() {
           <Field label="Password (min 8 chars)" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Choose a password" required minLength={8} />
           {err && <p className="font-mono text-xs text-editorial">{err}</p>}
           <Button type="submit" disabled={busy} className="w-full">
-            {busy ? "Creating…" : `Continue as ${role === "member" ? "Customer" : "Reviewer"}`}
+            {busy ? "Creating…" : `Sign up as ${role === "member" ? "Buyer" : "Reviewer"}`}
           </Button>
         </form>
         <p className="mt-6 font-body text-sm text-neutral-600">
