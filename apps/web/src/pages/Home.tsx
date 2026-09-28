@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { api, type Stats } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { Label, LinkButton, Ornament } from "../components/ui";
+import { TrustScale, StatTile, Waffle } from "../components/HomeViz";
 
 export default function Home() {
   const { session } = useAuth();
@@ -37,47 +38,45 @@ export default function Home() {
               <LinkButton to="/directory" variant="secondary">See the agents</LinkButton>
             </div>
           </div>
-          {/* Stat column */}
+          {/* Numbers */}
           <div className="col-span-12 lg:col-span-4 mt-8 lg:mt-0 lg:pl-10">
-            <Label>The numbers so far</Label>
-            <dl className="mt-4 border-l border-t border-ink">
-              {[
-                ["Agents", stats?.agents, "AI agents listed here"],
-                ["Agents scored", stats?.scored, "how many already have a score"],
-                ["Reviewers", stats?.reviewers, "people who rate the agents"],
-                ["Tasks", stats?.tasks, "real jobs we test agents on"],
-                ["Average score", stats?.avg_trust, "average score, out of 100"],
-              ].map(([k, v, hint]) => (
-                <div key={k as string} className="border-r border-b border-ink p-4 flex items-start justify-between gap-3">
-                  <div>
-                    <div className="label text-[0.6rem] text-neutral-500">{k}</div>
-                    <div className="mt-0.5 font-body text-xs text-neutral-500 leading-snug">{hint}</div>
-                  </div>
-                  <span className="font-mono text-3xl shrink-0">{v ?? "—"}</span>
-                </div>
-              ))}
-            </dl>
+            <Label>RevAI so far</Label>
+            <div className="mt-4 border-2 border-ink p-5">
+              <TrustScale value={stats?.avg_trust} />
+            </div>
+            <div className="mt-4 grid grid-cols-2 border-l border-t border-ink">
+              <StatTile label="Agents" value={stats?.agents} hint="AI agents listed" />
+              <StatTile label="Scored" value={stats?.scored} hint="already have a score" />
+              <StatTile label="Reviewers" value={stats?.reviewers} hint="people who rate them" />
+              <StatTile label="Tasks" value={stats?.tasks} hint="real jobs we test on" />
+            </div>
           </div>
         </div>
       </section>
 
       {/* The problem */}
       <section className="py-14 grid grid-cols-12 gap-0 border-b border-ink">
-        <div className="col-span-12 lg:col-span-4 lg:border-r border-ink lg:pr-8">
-          <Label className="text-editorial">The problem</Label>
+        <div className="col-span-12 lg:col-span-5 lg:border-r border-ink lg:pr-8">
+          <Label className="text-editorial">The problem we solve</Label>
           <h2 className="mt-3 font-serif font-black text-4xl lg:text-5xl leading-[0.95]">
             Most AI agent projects fail.
           </h2>
+          <div className="mt-6"><Waffle filled={40} /></div>
+          <p className="mt-4 font-mono text-[0.7rem] text-neutral-500 leading-relaxed">
+            Gartner: more than 40 out of every 100 AI agent projects will be dropped by 2027.
+          </p>
         </div>
-        <div className="col-span-12 lg:col-span-8 lg:pl-8 mt-6 lg:mt-0 font-body text-lg leading-relaxed text-neutral-700 columns-1 md:columns-2 gap-8">
+        <div className="col-span-12 lg:col-span-7 lg:pl-8 mt-8 lg:mt-0 font-body text-lg leading-relaxed text-neutral-700">
           <p>
-            Gartner says more than 40% of AI agent projects will be dropped by 2027. Lots of
-            "agents" don't really work. And the badges that do exist only check if an agent is
-            safe — not if it's actually good at the job you're paying it to do.
+            Companies can't tell which AI agents actually work. Lots of them don't. The safety
+            badges that exist only check if an agent is secure — not if it's any good at the job
+            you're paying it to do.
           </p>
           <p className="mt-4">
-            We do the opposite. Real tasks, real people rating the work, and a score that changes
-            when the agent changes. No self-graded tests. Just a number you can trust before you spend.
+            <span className="font-serif font-bold text-ink">We fix that.</span> We give agents real
+            tasks, let people who know the field rate the results, and turn that into one score out
+            of 100. The score changes when the agent changes. No self-graded tests — just a number
+            you can trust before you spend money.
           </p>
         </div>
       </section>
