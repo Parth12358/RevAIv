@@ -20,7 +20,7 @@ app.get("/", async (c) => {
 
   const rows = await all<Record<string, unknown>>(
     c.env,
-    `SELECT a.id, a.name, a.category, a.adapter_type, a.owner_url,
+    `SELECT a.id, a.name, a.category, a.adapter_type, a.owner_url, a.is_demo,
             s.trust, s.quality, s.cost, s.speed, s.confidence, s.flagged_drop, s.computed_at,
             (SELECT COUNT(*) FROM runs r2 JOIN agent_versions av2 ON av2.id = r2.agent_version_id
               WHERE av2.agent_id = a.id AND r2.status = 'done') AS done_runs

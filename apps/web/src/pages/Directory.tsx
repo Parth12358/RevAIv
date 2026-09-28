@@ -102,7 +102,7 @@ export default function Directory() {
       </div>
 
       <p className="py-3 font-mono text-[0.65rem] uppercase tracking-widest text-neutral-500">
-        <span className="text-ink">Connected · live</span> = a real API we run and score · <span className="text-ink">Catalog</span> = listed service, run manually or awaiting connection
+        <span className="text-ink">Connected · live</span> = a real API we run and score · <span className="text-ink">Demo</span> = sample outputs, reviewable to show the flow · <span className="text-ink">Catalog</span> = listed, awaiting connection
       </p>
 
       {loading ? (
@@ -129,7 +129,13 @@ export default function Directory() {
                   <ScoreBadge trust={a.trust} confidence={a.confidence} size="sm" />
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {(a.done_runs ?? 0) > 0 ? <Tag tone="solid">Connected · live</Tag> : <Tag tone="outline">Catalog</Tag>}
+                  {a.is_demo === 1 ? (
+                    <Tag tone="outline">Demo · sample data</Tag>
+                  ) : (a.done_runs ?? 0) > 0 ? (
+                    <Tag tone="solid">Connected · live</Tag>
+                  ) : (
+                    <Tag tone="outline">Catalog</Tag>
+                  )}
                   {a.flagged_drop === 1 && <Tag tone="editorial">Score dropped 10+</Tag>}
                 </div>
               </div>

@@ -58,6 +58,7 @@ export interface DirectoryAgent {
   confidence: string | null;
   flagged_drop: number | null;
   done_runs?: number;
+  is_demo?: number;
 }
 export interface RubricDim {
   key: string;
