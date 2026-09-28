@@ -1,5 +1,9 @@
 -- Allow the same email to hold separate accounts per role (customer + reviewer).
 -- Rebuild users to replace UNIQUE(email) with UNIQUE(email, role).
+-- defer_foreign_keys lets us drop/rename the referenced users table inside the
+-- migration transaction (ids are preserved, so FKs stay valid at commit).
+PRAGMA defer_foreign_keys=TRUE;
+DROP TABLE IF EXISTS users_new;
 CREATE TABLE users_new (
   id                 TEXT PRIMARY KEY,
   email              TEXT NOT NULL,
