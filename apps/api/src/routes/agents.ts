@@ -76,13 +76,16 @@ app.get("/:id", async (c) => {
   // Reviews with the reviewer's public identity (the face behind the review).
   const reviews = await all<Record<string, unknown>>(
     c.env,
-    `SELECT rv.overall, rv.reason, rv.created_at,
+    `SELECT rv.overall, rv.reason, rv.created_at, rv.scores_json,
+            t.category AS task_category, t.prompt AS task_prompt,
             u.display_name AS reviewer_name, rs.headline AS reviewer_headline,
             rs.expertise_json AS reviewer_expertise, rs.gold_accuracy AS reviewer_accuracy,
+            rs.country AS reviewer_country, rs.reviews_count AS reviewer_reviews,
             rs.linkedin_url AS reviewer_linkedin
        FROM reviews rv
        JOIN runs r ON r.id = rv.run_id
        JOIN agent_versions av ON av.id = r.agent_version_id
+       LEFT JOIN tasks t ON t.id = rv.task_id
        LEFT JOIN users u ON u.id = rv.reviewer_id
        LEFT JOIN reviewer_stats rs ON rs.reviewer_id = rv.reviewer_id
       WHERE av.agent_id = ?1 AND rv.is_gold_check = 0
@@ -92,6 +95,9 @@ app.get("/:id", async (c) => {
   for (const r of reviews) {
     if (typeof r.reviewer_expertise === "string") {
       (r as any).reviewer_expertise = JSON.parse(r.reviewer_expertise as string);
+    }
+    if (typeof r.scores_json === "string") {
+      try { (r as any).scores = JSON.parse(r.scores_json as string); } catch { /* ignore */ }
     }
   }
 

@@ -107,20 +107,42 @@ export default function AgentDetail() {
                       )}
                     </div>
                     {r.reviewer_headline && <div className="font-mono text-[0.65rem] uppercase tracking-widest text-neutral-500">{r.reviewer_headline}</div>}
+                    <div className="mt-0.5 font-mono text-[0.6rem] text-neutral-500">
+                      {r.reviewer_country ? `${r.reviewer_country} · ` : ""}{r.reviewer_reviews ?? 0} reviews
+                      {r.reviewer_accuracy != null ? ` · ${Math.round(r.reviewer_accuracy * 100)}% gold` : ""}
+                    </div>
                   </div>
-                  <div className="font-mono text-2xl">{r.overall?.toFixed?.(1) ?? r.overall}</div>
+                  <div className="text-right">
+                    <div className="font-mono text-2xl leading-none">{r.overall?.toFixed?.(1) ?? r.overall}<span className="text-neutral-400 text-sm">/10</span></div>
+                    <div className="font-mono text-[0.55rem] text-neutral-400 mt-0.5">{(r.created_at ?? "").slice(0, 10)}</div>
+                  </div>
                 </div>
+
+                {/* What test they rated */}
+                {r.task_prompt && (
+                  <div className="mt-3 border-l-2 border-ink pl-3">
+                    <div className="font-mono text-[0.55rem] uppercase tracking-widest text-editorial">Rated on · {(r.task_category ?? "").replace(/_/g, " ")}</div>
+                    <p className="mt-0.5 font-body text-xs text-neutral-600 leading-snug line-clamp-2">{r.task_prompt}</p>
+                  </div>
+                )}
+
+                {/* Per-dimension scores */}
+                {r.scores && (
+                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[0.6rem] uppercase tracking-widest text-neutral-600">
+                    {Object.entries(r.scores).map(([k, v]) => (
+                      <span key={k}>{k}: <span className="text-ink">{v as number}</span></span>
+                    ))}
+                  </div>
+                )}
+
                 {r.reviewer_expertise?.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1">
+                  <div className="mt-3 flex flex-wrap gap-1">
                     {r.reviewer_expertise.slice(0, 3).map((e: string) => (
                       <span key={e} className="border border-ink px-2 py-0.5 font-mono text-[0.55rem] uppercase tracking-widest">{e.replace(/_/g, " ")}</span>
                     ))}
                   </div>
                 )}
                 <p className="mt-3 font-body text-sm text-neutral-700 leading-relaxed">"{r.reason}"</p>
-                {r.reviewer_accuracy != null && (
-                  <p className="mt-2 font-mono text-[0.6rem] text-neutral-500">Reviewer gold accuracy: {Math.round(r.reviewer_accuracy * 100)}%</p>
-                )}
               </div>
             ))}
           </div>
