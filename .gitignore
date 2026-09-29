@@ -10,3 +10,7 @@ dist
 .exa.env
 .groq.env
 .openai.env
+
+# Local DB backups — contain real user emails + password hashes, never commit
+backups/
+*.sql.bak
